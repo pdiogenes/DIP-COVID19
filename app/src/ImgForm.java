@@ -2,6 +2,7 @@
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 import processing.ImageResize;
 
 
@@ -28,6 +29,8 @@ public class ImgForm extends javax.swing.JFrame {
         // exibe a imagem no label
         lblImagem.setIcon(new ImageIcon(newImg));
     }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.

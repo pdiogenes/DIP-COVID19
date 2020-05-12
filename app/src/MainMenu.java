@@ -1,11 +1,22 @@
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -15,6 +26,27 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author Pedro
  */
 public class MainMenu extends javax.swing.JFrame {
+
+    JButton btnZoomIn, btnZoomOut, btnSelectSample, btnProcess;
+    MainImage mainImage;
+    HistogramImage histogramImage;
+    ActionListener actionListener = new ActionListener() {
+
+        /*
+         * handling button functionality
+         */
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == btnZoomIn) {
+
+            } else if (e.getSource() == btnZoomOut) {
+
+            } else if (e.getSource() == btnSelectSample) {
+
+            } else if (e.getSource() == btnProcess) {
+
+            }
+        }
+    };
 
     /**
      * Creates new form MainMenu
@@ -73,7 +105,6 @@ public class MainMenu extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAbrirImagemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbrirImagemActionPerformed
-        /*// cria um file chooser para selecionar a imagem
         JFileChooser fc = new JFileChooser();
         FileFilter filter = new FileNameExtensionFilter("jpg, png, tiff", "jpg", "png", "tiff");
         fc.setFileFilter(filter);
@@ -84,29 +115,8 @@ public class MainMenu extends javax.swing.JFrame {
             try {
                 // ler imagem em um BufferedImage
                 img = ImageIO.read(file);
-                // escalar o buffer
-                Image newImg = img.getScaledInstance(lblImagem.getWidth(), lblImagem.getHeight(),Image.SCALE_SMOOTH);
-                // exibe a imagem no label
-                lblImagem.setIcon(new ImageIcon(newImg));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }*/
-        
-        JFileChooser fc = new JFileChooser();
-        FileFilter filter = new FileNameExtensionFilter("jpg, png, tiff", "jpg", "png", "tiff");
-        fc.setFileFilter(filter);
-        int result = fc.showOpenDialog(null);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            BufferedImage img = null;
-            try {
-                // ler imagem em um BufferedImage
-                img = ImageIO.read(file);
+                this.show_image(img);
                 // cria nova exibição de imagem
-                ImgForm imgForm = new ImgForm();
-                imgForm.setImage(img);
-                imgForm.setVisible(true);
                 this.dispose();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -121,7 +131,7 @@ public class MainMenu extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -153,4 +163,93 @@ public class MainMenu extends javax.swing.JFrame {
     private javax.swing.JButton btnAbrirImagem;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
+
+    /*public void show_image(BufferedImage img) {
+        // create main frame
+        JFrame frame = new JFrame("Swing Paint");
+        Container content = frame.getContentPane();
+        // set layout on content pane
+        content.setLayout(new BorderLayout());
+        // create draw area
+        mainImage = new MainImage(img);
+        histogramImage = new HistogramImage();
+
+
+        // add to content pane
+        content.add(mainImage, BorderLayout.CENTER);
+        content.add(histogramImage, BorderLayout.SOUTH);
+
+        // create controls to apply colors and call clear feature
+        JPanel controls2 = new JPanel();
+
+        controls2.setLayout(new BoxLayout(controls2, BoxLayout.X_AXIS));
+
+        // create panel
+        // createPanel(controls);
+        createPanel2(controls2);
+
+        // add to content pane
+        // content.add(controls, BorderLayout.NORTH);
+        content.add(controls2, BorderLayout.NORTH);
+
+        frame.setSize(800, 500);
+        // can close frame
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // show the swing paint result
+        frame.setVisible(true);
+
+        // Now you can try our Swing Paint !!! Enjoy :D
+    }*/
+    
+    public void show_image(BufferedImage img) {
+        // create main frame
+        JFrame frame = new JFrame("Swing Paint");
+        JPanel controls = new JPanel();
+
+        controls.setLayout(new BoxLayout(controls, BoxLayout.X_AXIS));
+        createPanel(controls);
+        
+        
+        mainImage = new MainImage(img);
+        histogramImage = new HistogramImage();
+        
+        JPanel images = new JPanel();
+        images.setLayout(new BoxLayout(images, BoxLayout.LINE_AXIS));
+        images.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        images.add(mainImage);
+        images.add(Box.createRigidArea(new Dimension(0, 10)));
+        images.add(histogramImage);
+        
+        Container content = frame.getContentPane();
+        content.add(controls, BorderLayout.NORTH);
+        content.add(images, BorderLayout.CENTER);
+
+        frame.setSize(800, 500);
+        // can close frame
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // show the swing paint result
+        frame.setVisible(true);
+        
+    }
+
+    /*
+     * handles button listeners and adds them to the control pane
+     */
+    private void createPanel(JPanel controls) {
+        btnZoomIn = new JButton("Zoom In");
+        btnZoomIn.addActionListener(actionListener);
+        btnZoomOut = new JButton("Zoom Out");
+        btnZoomOut.addActionListener(actionListener);
+        btnSelectSample = new JButton("Select Sample");
+        btnSelectSample.addActionListener(actionListener);
+        btnProcess = new JButton("Find Viruses");
+        btnProcess.addActionListener(actionListener);
+
+        controls.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        controls.add(btnZoomIn);
+        controls.add(btnZoomOut);
+        controls.add(btnSelectSample);
+        controls.add(btnProcess);
+    }
+
 }
