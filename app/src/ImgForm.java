@@ -2,6 +2,7 @@
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
+import processing.ImageResize;
 
 
 /**
@@ -22,9 +23,10 @@ public class ImgForm extends javax.swing.JFrame {
     void displayImage(){
         // limpa o label
         lblImagem.setText("");
+        // redimensiona a imagem
+        BufferedImage newImg = ImageResize.resize(this.img, lblImagem.getWidth(), lblImagem.getHeight());
         // exibe a imagem no label
-        lblImagem.setIcon(new ImageIcon(
-                new ImageIcon(this.img).getImage().getScaledInstance(lblImagem.getWidth(), lblImagem.getHeight(), Image.SCALE_DEFAULT)));
+        lblImagem.setIcon(new ImageIcon(newImg));
     }
 
     /**
