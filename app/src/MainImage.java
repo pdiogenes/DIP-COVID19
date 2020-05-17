@@ -4,13 +4,15 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -18,39 +20,51 @@ import javax.swing.JComponent;
 import utilities.DeepCopy;
 import utilities.Grayscale;
 
-public class MainImage extends JComponent implements MouseListener, MouseMotionListener{
+public class MainImage extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener{
+    // sampleImage is the selected sample of the image
     private BufferedImage image, sampleImage;
     private Graphics2D g2;
     private String current_state;
+    // shape to draw the selected area with
     private Shape shape = null;
     Point startDrag, endDrag;
     Point sampleP1 = new Point(), sampleP2 = new Point();
     final MainMenu mm;
+    double zoomFactor = 1;
+    boolean zoomer = false;
 
-    // constructor for the canvas, adds the mouse listener and initiates the object
-    // lists
+    // constructor for the canvas, adds the mouse listeners
     public MainImage(BufferedImage img, MainMenu m){
         mm = m;
         this.image = img;
+        
         setDoubleBuffered(false);
         addMouseListener(this);
         addMouseMotionListener(this);
+        addMouseWheelListener(this);
     }
 
     // paints the canvas whenever repaint() is called
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+        
+        // zoom in and out of image
+        AffineTransform at = new AffineTransform();
+        at.scale(zoomFactor, zoomFactor);
+        g2.transform(at);
+        
         g2.drawImage(this.image, 0, 0, null);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         g2.setStroke(new BasicStroke(2));
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.50f));
 
+        // draws a square on the selected area
         if (shape != null) {
             g2.setPaint(Color.BLACK);
             g2.draw(shape);
-            g2.setPaint(Color.YELLOW);
+            g2.setPaint(Color.RED);
             g2.fill(shape);
         }
     }
@@ -94,6 +108,20 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
             }
         }
     }
+    
+    private double getZoomFactor(){
+        return this.zoomFactor;
+    }
+    
+    private void setZoomFactor(double factor){
+        if(factor < this.zoomFactor){
+            this.zoomFactor = this.zoomFactor/1.1;
+        }
+        else {
+            this.zoomFactor = factor;
+        }
+        this.zoomer = true;
+    }
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -101,17 +129,21 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
     @Override
     public void mousePressed(MouseEvent e) {
-        startDrag = new Point(e.getX(), e.getY());
+        int newX = (int)(e.getX()/zoomFactor);
+        int newY = (int)(e.getY()/zoomFactor);
+        startDrag = new Point(newX, newY);
         endDrag = startDrag;
         repaint();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        int newX = (int)(e.getX()/zoomFactor);
+        int newY = (int)(e.getY()/zoomFactor);
         if (endDrag != null && startDrag != null && (endDrag != startDrag)) {
             try {
-                shape = makeRectangle(startDrag.x, startDrag.y, e.getX(), e.getY());
-                fixPoints(startDrag.x, startDrag.y, e.getX(), e.getY());
+                shape = makeRectangle(startDrag.x, startDrag.y, newX, newY);
+                fixPoints(startDrag.x, startDrag.y, newX, newY);
                 BufferedImage subImage = image.getSubimage(sampleP1.x, sampleP1.y, sampleP2.x - sampleP1.x,
                         sampleP2.y - sampleP1.y);
                 sampleImage = DeepCopy.copyImage(Grayscale.getGray(subImage));
@@ -124,6 +156,29 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
             }
         }
     }
+    
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        int newX = (int)(e.getX()/zoomFactor);
+        int newY = (int)(e.getY()/zoomFactor);
+        endDrag = new Point(newX, newY);
+        shape = makeRectangle(startDrag.x, startDrag.y, newX, newY);
+        repaint();
+    }
+    
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        //Zoom in
+        if(e.getWheelRotation()<0){
+            setZoomFactor(1.1*getZoomFactor());
+            repaint();
+        }
+        //Zoom out
+        if(e.getWheelRotation()>0){
+            setZoomFactor(getZoomFactor()/1.1);
+            repaint();
+        }
+    }
 
     @Override
     public void mouseEntered(MouseEvent e) {
@@ -131,13 +186,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
     @Override
     public void mouseExited(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        endDrag = new Point(e.getX(), e.getY());
-        shape = makeRectangle(startDrag.x, startDrag.y, e.getX(), e.getY());
-        repaint();
     }
 
     @Override

@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -33,6 +34,7 @@ public class MainMenu extends javax.swing.JFrame {
     JPanel sampleArea;
     BufferedImage image;
     int imgw, imgh;
+    JFrame imageFrame = null;
 
     public MainMenu() {
         initComponents();
@@ -50,7 +52,7 @@ public class MainMenu extends javax.swing.JFrame {
 
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
-        jLabel1 = new javax.swing.JLabel();
+        lblGuide = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         menuAbrirImg = new javax.swing.JMenuItem();
@@ -64,8 +66,9 @@ public class MainMenu extends javax.swing.JFrame {
         jMenuItem2.setText("jMenuItem2");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("PID-Corona");
 
-        jLabel1.setText("Seleciona uma imagem em Arquivo > Abrir Imagem");
+        lblGuide.setText("Seleciona uma imagem em Arquivo > Abrir Imagem");
 
         jMenu1.setText("Arquivo");
 
@@ -109,14 +112,14 @@ public class MainMenu extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(72, 72, 72)
-                .addComponent(jLabel1)
+                .addComponent(lblGuide)
                 .addContainerGap(74, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
-                .addComponent(jLabel1)
+                .addComponent(lblGuide)
                 .addContainerGap(33, Short.MAX_VALUE))
         );
 
@@ -129,7 +132,7 @@ public class MainMenu extends javax.swing.JFrame {
 
     private void menuAbrirImgActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jMenuItem3ActionPerformed
         JFileChooser fc = new JFileChooser();
-        FileFilter filter = new FileNameExtensionFilter("jpg, png, tiff", "jpg", "png", "tiff");
+        FileFilter filter = new FileNameExtensionFilter("Imagens Permitidas", "jpg", "png", "tiff");
         fc.setFileFilter(filter);
         //fc.setCurrentDirectory(new File("./src/images"));
         int result = fc.showOpenDialog(null);
@@ -188,13 +191,13 @@ public class MainMenu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JLabel lblGuide;
     private javax.swing.JMenuItem menuAbrirImg;
     private javax.swing.JMenuItem menuCreate;
     private javax.swing.JMenu menuHist;
@@ -202,44 +205,62 @@ public class MainMenu extends javax.swing.JFrame {
 
 
     public void show_image() {
+        // checks if theres already one opened
+        if(imageFrame != null){
+            imageFrame.dispose();
+        }
         // create main frame
-        JFrame imageFrame = new JFrame("Imagem");
+        imageFrame = new JFrame("Imagem");
         imageFrame.getContentPane().setLayout(null);
-        imageFrame.setSize(imgw + 500, imgh + 60);
+        imageFrame.setSize(imgw + 500, imgh + 80);
 
-        // create classes for both histogram and main image
+        // create class for main image
         mainImage = new MainImage(this.image, this);
         
-
+        // adds instructions
+        JLabel instructions = new JLabel("Scroll to zoom, click and drag on the image to select a sample");
+        imageFrame.getContentPane().add(instructions);
+        instructions.setLocation(10, 10);
+        
+        // creates a panel in which the sample image will be drawn
         sampleArea = new JPanel();
         sampleArea.setBounds(imgw + 50, 10, imgw, imgh);
         imageFrame.getContentPane().add(sampleArea);
         mainImage.setBounds(10, 10, imgw, imgh);
+        
+        // adds m ain image to container
         imageFrame.getContentPane().add(mainImage);
         imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        // create container for histogram image
         
-        imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
-        
+        // shows main image frame
         imageFrame.setVisible(true);
         imageFrame.setResizable(false);
         
+        // enables the option to show the image's histogram 
         menuHist.setEnabled(true);
+        lblGuide.setText("Abra o hisograma da imagem em Histogram > Draw Histogram");
 
     }
     
     public void show_histogram(){
+        // creates a frame for the histogram
         JFrame histFrame = new JFrame("Histograma");
         histogramImage = new HistogramImage(this.image);
+        
+        // creates a panel for the histogram to be drawn on
         JPanel histogram = new JPanel();
         histogram.setLayout(new BoxLayout(histogram, BoxLayout.LINE_AXIS));
         histogram.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         histogram.add(histogramImage);
         Container hcontent = histFrame.getContentPane();
+        
+        // creates the histogram chart and adds it to the panel
         hcontent.add(histogramImage.createChart(this.image), BorderLayout.CENTER);
+        
+        // sets the screen size
         histFrame.setSize(1100, 900);
+        
+        // opens the frame
         histFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         histFrame.setVisible(true);
     }
