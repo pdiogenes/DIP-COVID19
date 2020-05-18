@@ -25,13 +25,13 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     private BufferedImage image, sampleImage;
     private Graphics2D g2;
     private String current_state;
+    private boolean toggleZoom = false;
     // shape to draw the selected area with
     private Shape shape = null;
     Point startDrag, endDrag;
     Point sampleP1 = new Point(), sampleP2 = new Point();
     final MainMenu mm;
     double zoomFactor = 1;
-    boolean zoomer = false;
 
     // constructor for the canvas, adds the mouse listeners
     public MainImage(BufferedImage img, MainMenu m){
@@ -50,9 +50,12 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         Graphics2D g2 = (Graphics2D) g;
         
         // zoom in and out of image
-        AffineTransform at = new AffineTransform();
-        at.scale(zoomFactor, zoomFactor);
-        g2.transform(at);
+        if(toggleZoom){
+            AffineTransform at = new AffineTransform();
+            at.scale(zoomFactor, zoomFactor);
+            g2.transform(at); 
+            toggleZoom = false;
+        }
         
         g2.drawImage(this.image, 0, 0, null);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -120,7 +123,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         else {
             this.zoomFactor = factor;
         }
-        this.zoomer = true;
+        toggleZoom = true;
     }
 
     @Override
@@ -138,8 +141,17 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        int newX = (int)(e.getX()/zoomFactor);
-        int newY = (int)(e.getY()/zoomFactor);
+        int x = e.getX();
+        int y = e.getY();
+        
+        if (x < 0) x = 0;
+        else if (x > this.getWidth()) x = this.getWidth();
+        
+        if (y < 0) y = 0;
+        else if(y > this.getHeight()) y = this.getHeight();        
+        
+        int newX = (int)(x/zoomFactor);
+        int newY = (int)(y/zoomFactor);
         if (endDrag != null && startDrag != null && (endDrag != startDrag)) {
             try {
                 shape = makeRectangle(startDrag.x, startDrag.y, newX, newY);
@@ -147,7 +159,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
                 BufferedImage subImage = image.getSubimage(sampleP1.x, sampleP1.y, sampleP2.x - sampleP1.x,
                         sampleP2.y - sampleP1.y);
                 sampleImage = DeepCopy.copyImage(Grayscale.getGray(subImage));
-                mm.updateSelectedRegion(sampleImage);
+                mm.drawSample(sampleImage);
                 startDrag = null;
                 endDrag = null;
                 repaint();

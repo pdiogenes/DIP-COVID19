@@ -219,16 +219,17 @@ public class MainMenu extends javax.swing.JFrame {
         
         // adds instructions
         JLabel instructions = new JLabel("Scroll to zoom, click and drag on the image to select a sample");
+        instructions.setBounds(10, imgh + 25, imageFrame.getWidth(), 20);
         imageFrame.getContentPane().add(instructions);
-        instructions.setLocation(10, 10);
         
         // creates a panel in which the sample image will be drawn
         sampleArea = new JPanel();
         sampleArea.setBounds(imgw + 50, 10, imgw, imgh);
         imageFrame.getContentPane().add(sampleArea);
-        mainImage.setBounds(10, 10, imgw, imgh);
         
         // adds m ain image to container
+        
+        mainImage.setBounds(10, 10, imgw, imgh);
         imageFrame.getContentPane().add(mainImage);
         imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
@@ -265,7 +266,7 @@ public class MainMenu extends javax.swing.JFrame {
         histFrame.setVisible(true);
     }
 
-    public void updateSelectedRegion(BufferedImage area) {
+    public void drawSample(BufferedImage area) {
         Graphics g = sampleArea.getGraphics();
         g.clearRect(0, 0, imgw, imgh);
         g.drawImage(area, 0, 0, null);
