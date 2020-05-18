@@ -25,7 +25,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     private BufferedImage image, sampleImage;
     private Graphics2D g2;
     private String current_state;
-    private boolean toggleZoom = false;
     // shape to draw the selected area with
     private Shape shape = null;
     Point startDrag, endDrag;
@@ -50,12 +49,9 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         Graphics2D g2 = (Graphics2D) g;
         
         // zoom in and out of image
-        if(toggleZoom){
-            AffineTransform at = new AffineTransform();
-            at.scale(zoomFactor, zoomFactor);
-            g2.transform(at); 
-            toggleZoom = false;
-        }
+        AffineTransform at = new AffineTransform();
+        at.scale(zoomFactor, zoomFactor);
+        g2.transform(at);
         
         g2.drawImage(this.image, 0, 0, null);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -123,7 +119,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         else {
             this.zoomFactor = factor;
         }
-        toggleZoom = true;
     }
 
     @Override
@@ -141,17 +136,15 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        int x = e.getX();
-        int y = e.getY();
+        int newX = (int)(e.getX()/zoomFactor);
+        int newY = (int)(e.getY()/zoomFactor);
         
-        if (x < 0) x = 0;
-        else if (x > this.getWidth()) x = this.getWidth();
+        if (newX < 0) newX = 0;
+        else if (newX > this.getWidth()) newX = this.getWidth();
         
-        if (y < 0) y = 0;
-        else if(y > this.getHeight()) y = this.getHeight();        
-        
-        int newX = (int)(x/zoomFactor);
-        int newY = (int)(y/zoomFactor);
+        if (newY < 0) newY = 0;
+        else if(newY > this.getHeight()) newY = this.getHeight();        
+
         if (endDrag != null && startDrag != null && (endDrag != startDrag)) {
             try {
                 shape = makeRectangle(startDrag.x, startDrag.y, newX, newY);
@@ -173,6 +166,13 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     public void mouseDragged(MouseEvent e) {
         int newX = (int)(e.getX()/zoomFactor);
         int newY = (int)(e.getY()/zoomFactor);
+        
+        if (newX < 0) newX = 0;
+        else if (newX > this.getWidth()) newX = this.getWidth();
+        
+        if (newY < 0) newY = 0;
+        else if(newY > this.getHeight()) newY = this.getHeight(); 
+        
         endDrag = new Point(newX, newY);
         shape = makeRectangle(startDrag.x, startDrag.y, newX, newY);
         repaint();
