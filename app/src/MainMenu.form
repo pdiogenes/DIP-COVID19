@@ -52,11 +52,21 @@
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu4">
+        <Menu class="javax.swing.JMenu" name="menuProc">
           <Properties>
             <Property name="text" type="java.lang.String" value="Processar"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="menuFind">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Achar Virus"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuFindActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
         </Menu>
       </SubComponents>
     </Menu>

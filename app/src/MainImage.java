@@ -17,8 +17,11 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
+import org.opencv.core.Mat;
+import processing.Threshold;
 import utilities.DeepCopy;
 import utilities.Grayscale;
+import utilities.MatConversion;
 
 public class MainImage extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener{
     // sampleImage is the selected sample of the image
@@ -121,6 +124,14 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         }
     }
 
+    // retirar depois
+    public void test(){
+        Mat teste = MatConversion.BufferedImage2Mat(sampleImage);
+        teste = Threshold.threshold(teste);
+        BufferedImage bteste = MatConversion.Mat2BufferedImage(teste);
+        mm.drawSample(bteste);
+    }
+    
     @Override
     public void mouseClicked(MouseEvent e) {
     }

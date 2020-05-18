@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -21,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.opencv.core.Core;
 import utilities.Grayscale;
 
 /**
@@ -38,7 +40,36 @@ public class MainMenu extends javax.swing.JFrame {
 
     public MainMenu() {
         initComponents();
+        loadLibraries();
     }
+    
+    void loadLibraries() {
+
+    try {
+        InputStream in = null;
+        File fileOut = null;
+        String osName = System.getProperty("os.name");
+        String opencvpath = System.getProperty("user.dir");
+        if(osName.startsWith("Windows")) {
+            int bitness = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+            if(bitness == 32) {
+                opencvpath=opencvpath+"\\opencv\\x86\\";
+            }
+            else if (bitness == 64) { 
+                opencvpath=opencvpath+"\\opencv\\x64\\";
+            } else { 
+                opencvpath=opencvpath+"\\opencv\\x86\\"; 
+            }           
+        } 
+        else if(osName.equals("Mac OS X")){
+            opencvpath = opencvpath+"Your path to .dylib";
+        }
+        System.out.println(opencvpath);
+        System.load(opencvpath + Core.NATIVE_LIBRARY_NAME + ".dll");
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to load opencv native library", e);
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -59,7 +90,8 @@ public class MainMenu extends javax.swing.JFrame {
         menuHist = new javax.swing.JMenu();
         menuCreate = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
-        jMenu4 = new javax.swing.JMenu();
+        menuProc = new javax.swing.JMenu();
+        menuFind = new javax.swing.JMenuItem();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -100,9 +132,18 @@ public class MainMenu extends javax.swing.JFrame {
         jMenu3.setEnabled(false);
         jMenuBar1.add(jMenu3);
 
-        jMenu4.setText("Processar");
-        jMenu4.setEnabled(false);
-        jMenuBar1.add(jMenu4);
+        menuProc.setText("Processar");
+        menuProc.setEnabled(false);
+
+        menuFind.setText("Achar Virus");
+        menuFind.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuFindActionPerformed(evt);
+            }
+        });
+        menuProc.add(menuFind);
+
+        jMenuBar1.add(menuProc);
 
         setJMenuBar(jMenuBar1);
 
@@ -129,6 +170,10 @@ public class MainMenu extends javax.swing.JFrame {
     private void menuCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCreateActionPerformed
         this.show_histogram();
     }//GEN-LAST:event_menuCreateActionPerformed
+
+    private void menuFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFindActionPerformed
+        mainImage.test();
+    }//GEN-LAST:event_menuFindActionPerformed
 
     private void menuAbrirImgActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jMenuItem3ActionPerformed
         JFileChooser fc = new JFileChooser();
@@ -193,14 +238,15 @@ public class MainMenu extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JLabel lblGuide;
     private javax.swing.JMenuItem menuAbrirImg;
     private javax.swing.JMenuItem menuCreate;
+    private javax.swing.JMenuItem menuFind;
     private javax.swing.JMenu menuHist;
+    private javax.swing.JMenu menuProc;
     // End of variables declaration//GEN-END:variables
 
 
@@ -240,6 +286,9 @@ public class MainMenu extends javax.swing.JFrame {
         // enables the option to show the image's histogram 
         menuHist.setEnabled(true);
         lblGuide.setText("Abra o hisograma da imagem em Histogram > Draw Histogram");
+        
+        // enables the option to process the image
+        menuProc.setEnabled(true);
 
     }
     
