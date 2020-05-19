@@ -24,5 +24,6 @@ hs_err_pid*
 /app/nbproject/private/
 /app/build/
 /app/dist/
+/app/opencv
 
 *.dll
