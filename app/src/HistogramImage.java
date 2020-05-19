@@ -8,9 +8,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import net.sourceforge.chart2d.*;
 
-
-
-public class HistogramImage extends JComponent{
+public class HistogramImage extends JComponent {
 
     private BufferedImage image;
     private Graphics2D g2;
@@ -18,24 +16,11 @@ public class HistogramImage extends JComponent{
     // constructor for the canvas, adds the mouse listener and initiates the object
     // lists
     public HistogramImage(BufferedImage image) {
-        //this.image = image;
+        // this.image = image;
     }
 
     // paints the canvas whenever repaint() is called
     protected void paintComponent(Graphics g) {
-        /*
-        if (null == null) {
-            // image to draw null ==> we create
-            image = new BufferedImage(500, 500, BufferedImage.TRANSLUCENT);
-            g2 = (Graphics2D) image.getGraphics();
-            // enable antialiasing
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            // clear draw area
-            clear();
-        }
-
-        g.drawImage(image, 0, 0, null);
-        */
     }
 
     // repaints white canvas
@@ -46,7 +31,7 @@ public class HistogramImage extends JComponent{
         g2.setPaint(Color.black);
         repaint();
     }
-    
+
     public LBChart2D createChart(BufferedImage gray) {
         // Chart2D configuration
         Object2DProperties object2DProps = new Object2DProperties();
@@ -55,7 +40,7 @@ public class HistogramImage extends JComponent{
         chart2DProps.setChartDataLabelsPrecision(-1);
         object2DProps.setObjectMagnifyWhenResize(false);
         LegendProperties legendProps = new LegendProperties();
-        String[] legendLabels = {"Gray"};
+        String[] legendLabels = { "Gray" };
         legendProps.setLegendLabelsTexts(legendLabels);
         GraphChart2DProperties graphChart2DProps = new GraphChart2DProperties();
         graphChart2DProps.setLabelsAxisTitleText("Gray");
@@ -76,7 +61,6 @@ public class HistogramImage extends JComponent{
             dataset.set(0, i, 0, counts[i]);
         }
 
-        
         MultiColorsProperties multiColorsProps = new MultiColorsProperties();
         LBChart2D chart2D = new LBChart2D();
         chart2D.setObject2DProperties(object2DProps);
@@ -87,14 +71,11 @@ public class HistogramImage extends JComponent{
         chart2D.addDataset(dataset);
         chart2D.addMultiColorsProperties(multiColorsProps);
 
-        //Optional validation:  Prints debug messages if invalid only.
+        // Optional validation: Prints debug messages if invalid only.
         if (!chart2D.validate(false)) {
             chart2D.validate(true);
         }
         return chart2D;
     }
-
-
-   
 
 }

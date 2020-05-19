@@ -4,8 +4,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -20,10 +18,17 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.highgui.HighGui;
+import org.opencv.imgproc.Imgproc;
 import utilities.Grayscale;
+import utilities.MatConversion;
 
 /**
  *
@@ -34,42 +39,43 @@ public class MainMenu extends javax.swing.JFrame {
     MainImage mainImage;
     HistogramImage histogramImage;
     JPanel sampleArea;
-    BufferedImage image;
+    JLabel imgLabel;
+    Mat sample, dst;
+    BufferedImage image, sampleImage;
     int imgw, imgh;
     JFrame imageFrame = null;
+    int threshValue;
 
     public MainMenu() {
         initComponents();
         loadLibraries();
+        sample = new Mat();
+        dst = new Mat();
     }
-    
-    void loadLibraries() {
 
-    try {
-        InputStream in = null;
-        File fileOut = null;
-        String osName = System.getProperty("os.name");
-        String opencvpath = System.getProperty("user.dir");
-        if(osName.startsWith("Windows")) {
-            int bitness = Integer.parseInt(System.getProperty("sun.arch.data.model"));
-            if(bitness == 32) {
-                opencvpath=opencvpath+"\\opencv\\x86\\";
+    public static void loadLibraries() {
+        try {
+            InputStream in = null;
+            File fileOut = null;
+            String osName = System.getProperty("os.name");
+            String opencvpath = System.getProperty("user.dir");
+            if (osName.startsWith("Windows")) {
+                int bitness = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+                if (bitness == 32) {
+                    opencvpath = opencvpath + "\\opencv\\x86\\";
+                } else if (bitness == 64) {
+                    opencvpath = opencvpath + "\\opencv\\x64\\";
+                } else {
+                    opencvpath = opencvpath + "\\opencv\\x86\\";
+                }
+            } else if (osName.equals("Mac OS X")) {
+                opencvpath = opencvpath + "Your path to .dylib";
             }
-            else if (bitness == 64) { 
-                opencvpath=opencvpath+"\\opencv\\x64\\";
-            } else { 
-                opencvpath=opencvpath+"\\opencv\\x86\\"; 
-            }           
-        } 
-        else if(osName.equals("Mac OS X")){
-            opencvpath = opencvpath+"Your path to .dylib";
+            System.load(opencvpath + Core.NATIVE_LIBRARY_NAME + ".dll");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load opencv native library", e);
         }
-        System.out.println(opencvpath);
-        System.load(opencvpath + Core.NATIVE_LIBRARY_NAME + ".dll");
-    } catch (Exception e) {
-        throw new RuntimeException("Failed to load opencv native library", e);
     }
-}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -78,7 +84,9 @@ public class MainMenu extends javax.swing.JFrame {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated
+    // <editor-fold defaultstate="collapsed" desc="Generated
+    // Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -89,7 +97,6 @@ public class MainMenu extends javax.swing.JFrame {
         menuAbrirImg = new javax.swing.JMenuItem();
         menuHist = new javax.swing.JMenu();
         menuCreate = new javax.swing.JMenuItem();
-        jMenu3 = new javax.swing.JMenu();
         menuProc = new javax.swing.JMenu();
         menuFind = new javax.swing.JMenuItem();
 
@@ -128,10 +135,6 @@ public class MainMenu extends javax.swing.JFrame {
 
         jMenuBar1.add(menuHist);
 
-        jMenu3.setText("Pegar Amostra");
-        jMenu3.setEnabled(false);
-        jMenuBar1.add(jMenu3);
-
         menuProc.setText("Processar");
         menuProc.setEnabled(false);
 
@@ -149,37 +152,30 @@ public class MainMenu extends javax.swing.JFrame {
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(72, 72, 72)
-                .addComponent(lblGuide)
-                .addContainerGap(74, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addComponent(lblGuide)
-                .addContainerGap(33, Short.MAX_VALUE))
-        );
+        layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup().addGap(72, 72, 72).addComponent(lblGuide).addContainerGap(74,
+                        Short.MAX_VALUE)));
+        layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup().addGap(30, 30, 30).addComponent(lblGuide).addContainerGap(33,
+                        Short.MAX_VALUE)));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void menuCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCreateActionPerformed
+    private void menuCreateActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuCreateActionPerformed
         this.show_histogram();
-    }//GEN-LAST:event_menuCreateActionPerformed
+    }// GEN-LAST:event_menuCreateActionPerformed
 
-    private void menuFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFindActionPerformed
+    private void menuFindActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuFindActionPerformed
         mainImage.test();
-    }//GEN-LAST:event_menuFindActionPerformed
+        // this.show_threshold();
+    }// GEN-LAST:event_menuFindActionPerformed
 
     private void menuAbrirImgActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jMenuItem3ActionPerformed
         JFileChooser fc = new JFileChooser();
         FileFilter filter = new FileNameExtensionFilter("Imagens Permitidas", "jpg", "png", "tiff");
         fc.setFileFilter(filter);
-        //fc.setCurrentDirectory(new File("./src/images"));
+        // fc.setCurrentDirectory(new File("./src/images"));
         int result = fc.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
@@ -237,7 +233,6 @@ public class MainMenu extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
@@ -249,10 +244,9 @@ public class MainMenu extends javax.swing.JFrame {
     private javax.swing.JMenu menuProc;
     // End of variables declaration//GEN-END:variables
 
-
     public void show_image() {
         // checks if theres already one opened
-        if(imageFrame != null){
+        if (imageFrame != null) {
             imageFrame.dispose();
         }
         // create main frame
@@ -262,61 +256,101 @@ public class MainMenu extends javax.swing.JFrame {
 
         // create class for main image
         mainImage = new MainImage(this.image, this);
-        
+
         // adds instructions
         JLabel instructions = new JLabel("Scroll to zoom, click and drag on the image to select a sample");
         instructions.setBounds(10, imgh + 25, imageFrame.getWidth(), 20);
         imageFrame.getContentPane().add(instructions);
-        
+
         // creates a panel in which the sample image will be drawn
         sampleArea = new JPanel();
         sampleArea.setBounds(imgw + 50, 10, imgw, imgh);
         imageFrame.getContentPane().add(sampleArea);
-        
+
         // adds m ain image to container
-        
+
         mainImage.setBounds(10, 10, imgw, imgh);
         imageFrame.getContentPane().add(mainImage);
         imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
+
         // shows main image frame
         imageFrame.setVisible(true);
         imageFrame.setResizable(false);
-        
-        // enables the option to show the image's histogram 
+
+        // enables the option to show the image's histogram
         menuHist.setEnabled(true);
         lblGuide.setText("Abra o hisograma da imagem em Histogram > Draw Histogram");
-        
+
         // enables the option to process the image
         menuProc.setEnabled(true);
 
     }
-    
-    public void show_histogram(){
+
+    public void show_histogram() {
         // creates a frame for the histogram
         JFrame histFrame = new JFrame("Histograma");
         histogramImage = new HistogramImage(this.image);
-        
+
         // creates a panel for the histogram to be drawn on
         JPanel histogram = new JPanel();
         histogram.setLayout(new BoxLayout(histogram, BoxLayout.LINE_AXIS));
         histogram.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         histogram.add(histogramImage);
         Container hcontent = histFrame.getContentPane();
-        
+
         // creates the histogram chart and adds it to the panel
         hcontent.add(histogramImage.createChart(this.image), BorderLayout.CENTER);
-        
+
         // sets the screen size
         histFrame.setSize(1100, 900);
-        
+
         // opens the frame
         histFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         histFrame.setVisible(true);
     }
 
+    public void show_threshold() { // https://docs.opencv.org/3.4/db/d8e/tutorial_threshold.html
+        JFrame thresh = new JFrame("Threshold");
+        JPanel slider = new JPanel();
+        slider.setLayout(new BoxLayout(slider, BoxLayout.PAGE_AXIS));
+
+        slider.add(new JLabel("Valor do Limiar"));
+        // Create Trackbar to choose Threshold value
+        JSlider sliderThreshValue = new JSlider(0, 255, 0);
+        sliderThreshValue.setMajorTickSpacing(50);
+        sliderThreshValue.setMinorTickSpacing(10);
+        sliderThreshValue.setPaintTicks(true);
+        sliderThreshValue.setPaintLabels(true);
+        slider.add(sliderThreshValue);
+
+        try {
+            sample = MatConversion.BufferedImage2Mat(Grayscale.getGray(sampleImage));
+        } catch (IOException e) {
+        }
+
+        sliderThreshValue.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                JSlider source = (JSlider) e.getSource();
+                threshValue = source.getValue();
+                Imgproc.threshold(sample, dst, threshValue, 255, Imgproc.THRESH_BINARY);
+                sampleImage = (BufferedImage) HighGui.toBufferedImage(dst);
+                imgLabel.setIcon(new ImageIcon(sampleImage));
+                thresh.repaint();
+            }
+        });
+
+        thresh.getContentPane().add(slider, BorderLayout.PAGE_START);
+        imgLabel = new JLabel(new ImageIcon(sampleImage));
+        thresh.getContentPane().add(imgLabel, BorderLayout.CENTER);
+
+        thresh.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        thresh.setVisible(true);
+    }
+
     public void drawSample(BufferedImage area) {
         Graphics g = sampleArea.getGraphics();
+        sampleImage = area;
         g.clearRect(0, 0, imgw, imgh);
         g.drawImage(area, 0, 0, null);
     }

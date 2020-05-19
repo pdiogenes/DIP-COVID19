@@ -46,12 +46,6 @@
             </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu3">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Pegar Amostra"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-        </Menu>
         <Menu class="javax.swing.JMenu" name="menuProc">
           <Properties>
             <Property name="text" type="java.lang.String" value="Processar"/>

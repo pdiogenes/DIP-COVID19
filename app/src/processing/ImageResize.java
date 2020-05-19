@@ -9,9 +9,9 @@ import java.awt.image.BufferedImage;
  * @author Pedro
  */
 public class ImageResize {
-    
+
     // método para redimensionar a imagem para as dimensões do container
-    public static BufferedImage resize(BufferedImage image, int w, int h){
+    public static BufferedImage resize(BufferedImage image, int w, int h) {
         BufferedImage bi = new BufferedImage(w, h, BufferedImage.TRANSLUCENT);
         Graphics2D g2d = (Graphics2D) bi.createGraphics();
         g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
@@ -19,5 +19,5 @@ public class ImageResize {
         g2d.dispose();
         return bi;
     }
-    
+
 }
