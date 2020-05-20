@@ -1,16 +1,15 @@
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -26,7 +25,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.highgui.HighGui;
-import org.opencv.imgproc.Imgproc;
+import processing.Threshold;
 import utilities.Grayscale;
 import utilities.MatConversion;
 
@@ -40,7 +39,7 @@ public class MainMenu extends javax.swing.JFrame {
     HistogramImage histogramImage;
     JPanel sampleArea;
     JLabel imgLabel;
-    Mat sample, dst;
+    Mat sample, sampleT;
     BufferedImage image, sampleImage;
     int imgw, imgh;
     JFrame imageFrame = null;
@@ -50,7 +49,7 @@ public class MainMenu extends javax.swing.JFrame {
         initComponents();
         loadLibraries();
         sample = new Mat();
-        dst = new Mat();
+        sampleT = new Mat();
     }
 
     public static void loadLibraries() {
@@ -167,8 +166,8 @@ public class MainMenu extends javax.swing.JFrame {
     }// GEN-LAST:event_menuCreateActionPerformed
 
     private void menuFindActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuFindActionPerformed
-        mainImage.test();
-        // this.show_threshold();
+        // mainImage.test();
+        this.show_threshold();
     }// GEN-LAST:event_menuFindActionPerformed
 
     private void menuAbrirImgActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jMenuItem3ActionPerformed
@@ -310,10 +309,21 @@ public class MainMenu extends javax.swing.JFrame {
     }
 
     public void show_threshold() { // https://docs.opencv.org/3.4/db/d8e/tutorial_threshold.html
+        // creating the frame for threshold value selection
         JFrame thresh = new JFrame("Threshold");
         JPanel slider = new JPanel();
         slider.setLayout(new BoxLayout(slider, BoxLayout.PAGE_AXIS));
+        JButton btnConfirmar = new JButton("Confirmar");
+        btnConfirmar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainImage.setSampleMat(sampleT);
+                thresh.dispose();
+            }
 
+        });
+
+        // adding labels
         slider.add(new JLabel("Valor do Limiar"));
         // Create Trackbar to choose Threshold value
         JSlider sliderThreshValue = new JSlider(0, 255, 0);
@@ -321,20 +331,23 @@ public class MainMenu extends javax.swing.JFrame {
         sliderThreshValue.setMinorTickSpacing(10);
         sliderThreshValue.setPaintTicks(true);
         sliderThreshValue.setPaintLabels(true);
+        // adds the slider to the frame
         slider.add(sliderThreshValue);
 
+        // get the OpenCV matrix for the sample iamge
         try {
             sample = MatConversion.BufferedImage2Mat(Grayscale.getGray(sampleImage));
         } catch (IOException e) {
         }
 
+        // changes threshold depending on slider value
         sliderThreshValue.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 JSlider source = (JSlider) e.getSource();
                 threshValue = source.getValue();
-                Imgproc.threshold(sample, dst, threshValue, 255, Imgproc.THRESH_BINARY);
-                sampleImage = (BufferedImage) HighGui.toBufferedImage(dst);
+                sampleT = Threshold.threshold(sample, threshValue);
+                sampleImage = (BufferedImage) HighGui.toBufferedImage(sampleT);
                 imgLabel.setIcon(new ImageIcon(sampleImage));
                 thresh.repaint();
             }
@@ -343,7 +356,13 @@ public class MainMenu extends javax.swing.JFrame {
         thresh.getContentPane().add(slider, BorderLayout.PAGE_START);
         imgLabel = new JLabel(new ImageIcon(sampleImage));
         thresh.getContentPane().add(imgLabel, BorderLayout.CENTER);
+        thresh.getContentPane().add(btnConfirmar, BorderLayout.PAGE_END);
 
+        // sets the window size
+        int windowW = Math.max(400, sample.width() * 2);
+        int windowH = Math.max(400, sample.height() * 2 + 100);
+
+        thresh.setSize(windowW, windowH);
         thresh.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         thresh.setVisible(true);
     }

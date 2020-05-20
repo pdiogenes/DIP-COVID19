@@ -38,6 +38,8 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     final MainMenu mm;
     double zoomFactor = 1;
 
+    private Mat sampleMat;
+
     // constructor for the canvas, adds the mouse listeners
     public MainImage(BufferedImage img, MainMenu m) {
         mm = m;
@@ -72,6 +74,12 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
             g2.setPaint(Color.RED);
             g2.fill(shape);
         }
+    }
+
+    void setSampleMat(Mat mat) {
+        this.sampleMat = mat;
+        BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(sampleMat);
+        mm.drawSample(bteste);
     }
 
     // changes app state (tells it which functionality it should execute)
@@ -135,11 +143,18 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         }
 
         teste = Threshold.threshold(teste);
-        teste = Labelling.rotulacao(teste);
+        teste = Labelling.labelling(teste);
+        // Mat label = new Mat();
+        // int c = Imgproc.connectedComponents(teste, label, 8, CvType.CV_16U);
+        // System.out.println(c + " components");
+
+        // Mat seeMyLabels = new Mat();
+        // Core.normalize(label, seeMyLabels, 0, 255, Core.NORM_MINMAX, CV_8UC1);
         BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
         mm.drawSample(bteste);
         // BufferedImage t = Threshold.threshold(sampleImage);
         // mm.drawSample(t);
+
     }
 
     @Override
