@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
@@ -13,20 +14,13 @@ import org.opencv.photo.Photo;
  * @author Pedro
  */
 public class Threshold {
-    // using OPENCV
-    public static Mat threshold(Mat mat) {
-        Mat dst = new Mat();
-        Imgproc.threshold(mat, dst, 125, 255, Imgproc.THRESH_BINARY_INV);
-        Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 0);
-        return dst;
-    }
 
-    // using opencv, with parameter
+    // using opencv, with parameters
     public static Mat threshold(Mat mat, int t) {
         Mat dst = new Mat();
-        Photo.fastNlMeansDenoising(mat, dst);
+        //Photo.fastNlMeansDenoising(mat, dst, 15);
+        Imgproc.medianBlur(mat, dst, 5);
         Imgproc.threshold(dst, dst, t, 255, Imgproc.THRESH_BINARY_INV);
-        Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 0);
         return dst;
     }
 

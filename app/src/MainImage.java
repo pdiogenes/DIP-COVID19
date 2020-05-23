@@ -16,10 +16,23 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComponent;
+import object.Component;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.highgui.HighGui;
+import org.opencv.imgproc.Imgproc;
 import processing.Labelling;
 import processing.Threshold;
 import utilities.DeepCopy;
@@ -38,12 +51,13 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     final MainMenu mm;
     double zoomFactor = 1;
 
-    private Mat sampleMat;
+    private Mat sampleMat, img;
 
     // constructor for the canvas, adds the mouse listeners
-    public MainImage(BufferedImage img, MainMenu m) {
+    public MainImage(Mat img, MainMenu m) {
         mm = m;
-        this.image = img;
+        this.img = img;
+        this.image = (BufferedImage) HighGui.toBufferedImage(img);
 
         setDoubleBuffered(false);
         addMouseListener(this);
@@ -80,17 +94,9 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         this.sampleMat = mat;
         BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(sampleMat);
         mm.drawSample(bteste);
+        test();
     }
-
-    // changes app state (tells it which functionality it should execute)
-    void setState(String state) {
-        this.current_state = state;
-    }
-
-    // returns current state
-    String getState() {
-        return this.current_state;
-    }
+    
 
     // opens the last saved image
 
@@ -136,22 +142,88 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
     // retirar depois
     public void test() {
-        Mat teste = null;
-        try {
-            teste = MatConversion.BufferedImage2Mat(Grayscale.getGray(sampleImage));
-        } catch (IOException e) {
-        }
+        Mat teste = new Mat();
+        //teste = HoughCircle.circleTransform(sampleMat);
+        Mat element = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2 * 2 + 1, 2 * 2 + 1),
+                new org.opencv.core.Point(2, 2));
+        Imgproc.Canny(sampleMat, teste, 100, 200);
+        Imgproc.dilate(teste, teste, element);
+        Imgproc.erode(teste, teste, element);
+        Mat label = new Mat();
+        
+        int c = Imgproc.connectedComponents(sampleMat, label, 4, CvType.CV_16U);
 
-        teste = Threshold.threshold(teste);
-        teste = Labelling.labelling(teste);
-        // Mat label = new Mat();
-        // int c = Imgproc.connectedComponents(teste, label, 8, CvType.CV_16U);
+
+        List<Mat> listMatriz = new ArrayList<>();
+        ArrayList<Component> objetos = new ArrayList<>();
+        int labelValue;
+        
+        for(int lbl = 1; lbl < c; lbl ++){
+            Mat mat = new Mat(label.height(), label.width(), CvType.CV_8UC1, new Scalar(0, 0, 0));
+            int size = 0;
+            for(int i = 0; i < label.height(); i++){
+                for(int j = 0; j < label.width(); j++){
+                    labelValue = (int)label.get(i, j)[0];
+                    if(labelValue == lbl){
+                        size++;
+                        mat.put(i, j, 255);
+                    }
+                }
+            }
+            System.out.println(size);
+            if(size > 100){
+                listMatriz.add(mat);
+                objetos.add(new Component(mat, size));
+            }
+        }
+        
+        Random rand = new Random();
+        Mat draw = Mat.zeros(teste.size(), CvType.CV_8UC3);
+        for(int i = 0; i < listMatriz.size(); i++){
+            ArrayList<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(objetos.get(i).getImage(), contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            for (int j = 0; j < contours.size(); j++) {
+                double cont_perimeter = Imgproc.arcLength(new MatOfPoint2f(contours.get(j).toArray()), true);
+                objetos.get(i).setPerimeter(cont_perimeter);
+                objetos.get(i).calculateFeatures();
+                System.out.println("Circularity: " + objetos.get(i).getCircularity());
+                Imgproc.drawContours(draw, contours, j, new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), -1);
+                BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(draw);
+                mm.drawSample(bteste);
+                try{
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException ie){
+                    
+                }
+            }
+        }
+        
+        
+        
+
+        // for(int i = 0; i < label.height(); i++){
+        //     for(int j = 0; j < label.width(); j++){
+        //         System.out.print(label.get(i, j)[0] + "  ");
+        //     }
+        //     System.out.print("\n");
+        // }
+        
         // System.out.println(c + " components");
 
         // Mat seeMyLabels = new Mat();
-        // Core.normalize(label, seeMyLabels, 0, 255, Core.NORM_MINMAX, CV_8UC1);
-        BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
-        mm.drawSample(bteste);
+        // Core.normalize(label, seeMyLabels, 0, 255, Core.NORM_MINMAX, CvType.CV_8UC1);
+
+
+        /*for(int i = 0; i < listMatriz.size(); i++){
+            teste = listMatriz.get(i);
+            BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
+            mm.drawSample(bteste);
+        }*/
+        //teste = Labelling.labelling(teste);
+        //teste = seeMyLabels;
+        // BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
+        // mm.drawSample(bteste);
         // BufferedImage t = Threshold.threshold(sampleImage);
         // mm.drawSample(t);
 

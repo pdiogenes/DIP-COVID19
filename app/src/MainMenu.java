@@ -2,13 +2,14 @@
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Graphics;
+import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -23,8 +24,13 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
 import org.opencv.highgui.HighGui;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import processing.Threshold;
 import utilities.Grayscale;
 import utilities.MatConversion;
@@ -41,6 +47,7 @@ public class MainMenu extends javax.swing.JFrame {
     JLabel imgLabel;
     Mat sample, sampleT;
     BufferedImage image, sampleImage;
+    Mat img;
     int imgw, imgh;
     JFrame imageFrame = null;
     int threshValue;
@@ -50,6 +57,7 @@ public class MainMenu extends javax.swing.JFrame {
         loadLibraries();
         sample = new Mat();
         sampleT = new Mat();
+        img = new Mat();
     }
 
     public static void loadLibraries() {
@@ -178,17 +186,13 @@ public class MainMenu extends javax.swing.JFrame {
         int result = fc.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            BufferedImage img = null;
-            try {
-                img = ImageIO.read(file);
-                imgw = img.getWidth();
-                imgh = img.getHeight();
-                BufferedImage gsImg = Grayscale.getGray(img);
-                this.image = gsImg;
-                this.show_image();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Mat image = Imgcodecs.imread(file.getPath());
+            Mat imageBW = new Mat(); 
+            Imgproc.cvtColor(image, imageBW, Imgproc.COLOR_RGB2GRAY);
+            imgw = imageBW.width();
+            imgh = imageBW.height();
+            this.img = imageBW;
+            this.show_image();
         }
     }// GEN-LAST:event_jMenuItem3ActionPerformed
 
@@ -254,7 +258,7 @@ public class MainMenu extends javax.swing.JFrame {
         imageFrame.setSize(imgw + 500, imgh + 80);
 
         // create class for main image
-        mainImage = new MainImage(this.image, this);
+        mainImage = new MainImage(this.img, this);
 
         // adds instructions
         JLabel instructions = new JLabel("Scroll to zoom, click and drag on the image to select a sample");
@@ -354,7 +358,7 @@ public class MainMenu extends javax.swing.JFrame {
         });
 
         thresh.getContentPane().add(slider, BorderLayout.PAGE_START);
-        imgLabel = new JLabel(new ImageIcon(sampleImage));
+        imgLabel = new JLabel(new ImageIcon(HighGui.toBufferedImage(sample)));
         thresh.getContentPane().add(imgLabel, BorderLayout.CENTER);
         thresh.getContentPane().add(btnConfirmar, BorderLayout.PAGE_END);
 

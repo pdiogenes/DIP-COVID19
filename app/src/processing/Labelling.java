@@ -78,13 +78,13 @@ public class Labelling {
         double minContourArea = 50;
         ArrayList<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
-        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         Mat draw = Mat.zeros(src.size(), CvType.CV_8UC3);
         for (int i = 0; i < contours.size(); i++) {
             double cont_area = Imgproc.contourArea(contours.get(i));
             if(cont_area > minContourArea){
                 System.out.println(cont_area);
-                Imgproc.drawContours(draw, contours, i, new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)));
+                Imgproc.drawContours(draw, contours, i, new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), -1);
             }
         }
         return draw;

@@ -50,5 +50,5 @@ public class MatConversion {
         byteArrayOutputStream.flush();
         return Imgcodecs.imdecode(new MatOfByte(byteArrayOutputStream.toByteArray()), Imgcodecs.IMREAD_UNCHANGED);
     }
-    
+
 }

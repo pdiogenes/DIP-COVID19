@@ -1,16 +1,4 @@
-# Compiled class file
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
@@ -24,6 +12,6 @@ hs_err_pid*
 /app/nbproject/private/
 /app/build/
 /app/dist/
-/app/opencv
 
+/app/opencv
 *.dll
