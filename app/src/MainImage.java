@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComponent;
 import object.Component;
+import object.HaralickFeatures;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -33,6 +34,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
+import processing.CrossCorrelation;
 import processing.Labelling;
 import processing.Threshold;
 import utilities.DeepCopy;
@@ -51,7 +53,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     final MainMenu mm;
     double zoomFactor = 1;
 
-    private Mat sampleMat, img;
+    private Mat sampleMat, img, imgThresh;
 
     // constructor for the canvas, adds the mouse listeners
     public MainImage(Mat img, MainMenu m) {
@@ -90,13 +92,13 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         }
     }
 
-    void setSampleMat(Mat mat) {
+    void setSampleMat(Mat mat, Mat imgT) {
         this.sampleMat = mat;
+        this.imgThresh = imgT;
         BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(sampleMat);
         mm.drawSample(bteste);
         test();
     }
-    
 
     // opens the last saved image
 
@@ -140,88 +142,91 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         }
     }
 
-    // retirar depois
+    // retirar depois PIROGA
     public void test() {
+        HaralickFeatures hf = new HaralickFeatures((BufferedImage)HighGui.toBufferedImage(sampleMat));
+
         Mat teste = new Mat();
-        //teste = HoughCircle.circleTransform(sampleMat);
+        // teste = HoughCircle.circleTransform(sampleMat);
         Mat element = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2 * 2 + 1, 2 * 2 + 1),
                 new org.opencv.core.Point(2, 2));
-        Imgproc.Canny(sampleMat, teste, 100, 200);
-        Imgproc.dilate(teste, teste, element);
-        Imgproc.erode(teste, teste, element);
         Mat label = new Mat();
-        
-        int c = Imgproc.connectedComponents(sampleMat, label, 4, CvType.CV_16U);
 
+        int c = Imgproc.connectedComponents(imgThresh, label, 4, CvType.CV_16U);
 
         List<Mat> listMatriz = new ArrayList<>();
         ArrayList<Component> objetos = new ArrayList<>();
         int labelValue;
-        
-        for(int lbl = 1; lbl < c; lbl ++){
+
+        for (int lbl = 1; lbl < c; lbl++) {
             Mat mat = new Mat(label.height(), label.width(), CvType.CV_8UC1, new Scalar(0, 0, 0));
             int size = 0;
-            for(int i = 0; i < label.height(); i++){
-                for(int j = 0; j < label.width(); j++){
-                    labelValue = (int)label.get(i, j)[0];
-                    if(labelValue == lbl){
+            for (int i = 0; i < label.height(); i++) {
+                for (int j = 0; j < label.width(); j++) {
+                    labelValue = (int) label.get(i, j)[0];
+                    if (labelValue == lbl) {
                         size++;
                         mat.put(i, j, 255);
                     }
                 }
             }
-            System.out.println(size);
-            if(size > 100){
+            if (size > 100) {
                 listMatriz.add(mat);
                 objetos.add(new Component(mat, size));
             }
         }
-        
+
+        double radio;
         Random rand = new Random();
         Mat draw = Mat.zeros(teste.size(), CvType.CV_8UC3);
-        for(int i = 0; i < listMatriz.size(); i++){
+        for (int i = 0; i < listMatriz.size(); i++) {
             ArrayList<MatOfPoint> contours = new ArrayList<>();
             Mat hierarchy = new Mat();
-            Imgproc.findContours(objetos.get(i).getImage(), contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(objetos.get(i).getImage(), contours, hierarchy, Imgproc.RETR_EXTERNAL,
+                    Imgproc.CHAIN_APPROX_SIMPLE);
             for (int j = 0; j < contours.size(); j++) {
                 double cont_perimeter = Imgproc.arcLength(new MatOfPoint2f(contours.get(j).toArray()), true);
                 objetos.get(i).setPerimeter(cont_perimeter);
                 objetos.get(i).calculateFeatures();
+                Mat xd = CrossCorrelation.match(objetos.get(i).getImage(), sampleMat);
+                if(xd == null){
+                    continue;
+                }
                 System.out.println("Circularity: " + objetos.get(i).getCircularity());
-                Imgproc.drawContours(draw, contours, j, new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), -1);
-                BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(draw);
+                System.out.println("Area: " + objetos.get(i).getArea());
+                radio = Math.sqrt(objetos.get(i).getArea()/3.14);
+                System.out.println("Raio: " + radio);
+                Imgproc.drawContours(draw, contours, j,
+                        new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), -1);
+                BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(xd);
                 mm.drawSample(bteste);
-                try{
+                try {
                     TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException ie){
-                    
+                } catch (InterruptedException ie) {
+
                 }
             }
         }
-        
-        
-        
 
         // for(int i = 0; i < label.height(); i++){
-        //     for(int j = 0; j < label.width(); j++){
-        //         System.out.print(label.get(i, j)[0] + "  ");
-        //     }
-        //     System.out.print("\n");
+        // for(int j = 0; j < label.width(); j++){
+        // System.out.print(label.get(i, j)[0] + " ");
         // }
-        
+        // System.out.print("\n");
+        // }
+
         // System.out.println(c + " components");
 
         // Mat seeMyLabels = new Mat();
         // Core.normalize(label, seeMyLabels, 0, 255, Core.NORM_MINMAX, CvType.CV_8UC1);
 
-
-        /*for(int i = 0; i < listMatriz.size(); i++){
-            teste = listMatriz.get(i);
-            BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
-            mm.drawSample(bteste);
-        }*/
-        //teste = Labelling.labelling(teste);
-        //teste = seeMyLabels;
+        /*
+         * for(int i = 0; i < listMatriz.size(); i++){ teste = listMatriz.get(i);
+         * BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
+         * mm.drawSample(bteste); }
+         */
+        // teste = Labelling.labelling(teste);
+        // teste = seeMyLabels;
         // BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
         // mm.drawSample(bteste);
         // BufferedImage t = Threshold.threshold(sampleImage);

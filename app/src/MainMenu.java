@@ -47,7 +47,7 @@ public class MainMenu extends javax.swing.JFrame {
     JLabel imgLabel;
     Mat sample, sampleT;
     BufferedImage image, sampleImage;
-    Mat img;
+    Mat img, imgT;
     int imgw, imgh;
     JFrame imageFrame = null;
     int threshValue;
@@ -58,6 +58,7 @@ public class MainMenu extends javax.swing.JFrame {
         sample = new Mat();
         sampleT = new Mat();
         img = new Mat();
+        imgT = new Mat();
     }
 
     public static void loadLibraries() {
@@ -255,7 +256,7 @@ public class MainMenu extends javax.swing.JFrame {
         // create main frame
         imageFrame = new JFrame("Imagem");
         imageFrame.getContentPane().setLayout(null);
-        imageFrame.setSize(imgw + 500, imgh + 80);
+        imageFrame.setSize(imgw * 2 + 25, imgh + 80);
 
         // create class for main image
         mainImage = new MainImage(this.img, this);
@@ -321,8 +322,8 @@ public class MainMenu extends javax.swing.JFrame {
         btnConfirmar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mainImage.setSampleMat(sampleT);
                 thresh.dispose();
+                mainImage.setSampleMat(sampleT, imgT);
             }
 
         });
@@ -351,20 +352,21 @@ public class MainMenu extends javax.swing.JFrame {
                 JSlider source = (JSlider) e.getSource();
                 threshValue = source.getValue();
                 sampleT = Threshold.threshold(sample, threshValue);
-                sampleImage = (BufferedImage) HighGui.toBufferedImage(sampleT);
-                imgLabel.setIcon(new ImageIcon(sampleImage));
+                imgT = Threshold.threshold(img, threshValue);
+                image = (BufferedImage) HighGui.toBufferedImage(imgT);
+                imgLabel.setIcon(new ImageIcon(image));
                 thresh.repaint();
             }
         });
 
         thresh.getContentPane().add(slider, BorderLayout.PAGE_START);
-        imgLabel = new JLabel(new ImageIcon(HighGui.toBufferedImage(sample)));
+        imgLabel = new JLabel(new ImageIcon(HighGui.toBufferedImage(img)));
         thresh.getContentPane().add(imgLabel, BorderLayout.CENTER);
         thresh.getContentPane().add(btnConfirmar, BorderLayout.PAGE_END);
 
         // sets the window size
-        int windowW = Math.max(400, sample.width() * 2);
-        int windowH = Math.max(400, sample.height() * 2 + 100);
+        int windowW = Math.max(400, img.width());
+        int windowH = Math.max(400, img.height() + 100);
 
         thresh.setSize(windowW, windowH);
         thresh.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
