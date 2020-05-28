@@ -1,15 +1,11 @@
 package processing;
 
-import java.awt.List;
 import java.util.ArrayList;
-import java.util.Random;
-import org.opencv.core.Core;
+import java.util.List;
+import object.Component;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 
 /**
@@ -17,76 +13,63 @@ import org.opencv.imgproc.Imgproc;
  * @author Vradoskein
  */
 public class Labelling {
-    // using OPENCV
-    public static Mat rotulacao(Mat mat) {
-        int rotulo = 0;
-        Mat dst = new Mat();
-        // Core.copyMakeBorder(mat, dst, 1, 1, 1, 1, Core.BORDER_CONSTANT, new Scalar(255, 255, 255));
 
-        // int size = dst.height() * dst.width() * dst.channels();
-        // byte[] px = new byte[size];
-        // dst.get(0,0,px);
-        // int[][] auxmat = new int[dst.height()][dst.width()];
+    public static List<Component> getLabels(Mat image) {
+        Mat label = new Mat();
+        List<Component> objetos = new ArrayList<>();
 
-        // // for(int i = 0; i < size ; i++){
-        // //     System.out.print(" info " + px[i]);
-        // // }
+        // returns the labelled binary image and the number of elements
+        int c = Imgproc.connectedComponents(image, label, 4, CvType.CV_16U);
 
-        // for (int row = 1; row < dst.height() - 1; row++) {
-        //     for (int col = 1, int i = 0; col < dst.width() - 1; col++, i++) {
-        //         if (px[i] == 0) {
-        //             if (auxmat[row - 1][col] != 0) {
-        //                 System.out.print("pos :[" +row"] ["+col"] [" + auxmat[row - 1][col] +"] ");
-        //                 auxmat[row][col] = auxmat[row - 1][col];
-
-        //             }
-        //             if (auxmat[row - 1][col - 1] != 0) {
-        //                 System.out.print("pos :[" +row"] ["+col"] [" +auxmat[row - 1][col - 1]+"] ");
-        //                 auxmat[row][col] = auxmat[row - 1][col - 1];
-        //             }
-        //             if (auxmat[row][col - 1] != 0) {
-        //                 System.out.print("pos :[" +row"] ["+col"] [" +auxmat[row][col - 1]+"] ");
-        //                 auxmat[row][col] = auxmat[row][col - 1];
-        //             }
-        //             if (auxmat[row + 1][col - 1] != 0) {
-        //                 System.out.print("pos :[" +row"] ["+col"] [" +auxmat[row + 1][col - 1]+"] ");
-        //                 auxmat[row][col] = auxmat[row + 1][col - 1];
-        //             }
-        //             if (auxmat[row - 1][col] == 0 && auxmat[row - 1][col - 1] == 0 && auxmat[row][col - 1] == 0
-        //                     && auxmat[row + 1][col - 1] == 0) {
-        //                 rotulo++;
-        //                 System.out.print(rotulo);
-        //                 auxmat[row][col] = rotulo;
-        //             }
-        //         }
-        //     }
-
-        //     System.out.println();
-        // }
-        // // for (int y = 0; y < dst.height(); y++) {
-        // //     for (int x = 0; x < dst.width(); x++) {
-        // //         System.out.print(auxmat[x][y]);
-        // //     }
-        // //     System.out.println();
-        // // }
-        return dst;
-    }
-    
-    public static Mat labelling(Mat src){
-        //Finding Contours
-        Random rand = new Random();
-        double minContourArea = 50;
-        ArrayList<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-        Mat draw = Mat.zeros(src.size(), CvType.CV_8UC3);
-        for (int i = 0; i < contours.size(); i++) {
-            double cont_area = Imgproc.contourArea(contours.get(i));
-            if(cont_area > minContourArea){
-                System.out.println(cont_area);
-                Imgproc.drawContours(draw, contours, i, new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), -1);
+        int labelValue;
+        
+        // creates an image for each of the objects
+        for (int lbl = 1; lbl < c; lbl++) {
+            Mat mat = new Mat(label.height(), label.width(), CvType.CV_8UC1, new Scalar(0, 0, 0));
+            int size = 0;
+            for (int i = 0; i < label.height(); i++) {
+                for (int j = 0; j < label.width(); j++) {
+                    labelValue = (int) label.get(i, j)[0];
+                    if (labelValue == lbl) {
+                        size++;
+                        mat.put(i, j, 255);
+                    }
+                }
+            }
+            // checks if the image has a decent size before adding it to the object list
+            // this is done to prevent random high frequency noise to be added
+            // but some still get added
+            if (size > 100) {
+                objetos.add(new Component(mat, size));
             }
         }
-        return draw;
+
+        return objetos;
+    }
+
+    public static Mat getImagesForLabel(Mat image, Mat original){
+        int menorW = image.width(), menorH = image.height();
+        int maiorW = 0, maiorH = 0;
+        int pixelValue;
+        
+        // finds where the object begins and ends on its own image
+        for (int i = 0; i < image.height(); i++) {
+            for (int j = 0; j < image.width(); j++) {
+                pixelValue = (int) image.get(i, j)[0];
+                if (pixelValue == 255) {
+                    if(i < menorH) menorH = i;
+                    if(i > maiorH) maiorH = i;
+                    if(j < menorW) menorW = j;
+                    if(j > maiorW) maiorW = j;
+                }
+            }
+        }
+        
+        // creates a new object image using the original provided image
+        // so we can use haralick descriptors and LBP on them
+        Mat newImg = original.clone();
+        Mat retorno = newImg.submat(menorH, maiorH, menorW, maiorW);
+        
+        return retorno;
     }
 }

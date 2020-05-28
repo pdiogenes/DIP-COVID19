@@ -1,16 +1,13 @@
 
+import hist.Histogram;
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Graphics;
-import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -24,10 +21,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -42,14 +36,13 @@ import utilities.MatConversion;
 public class MainMenu extends javax.swing.JFrame {
 
     MainImage mainImage;
-    HistogramImage histogramImage;
     JPanel sampleArea;
     JLabel imgLabel;
     Mat sample, sampleT;
     BufferedImage image, sampleImage;
     Mat img, imgT;
     int imgw, imgh;
-    JFrame imageFrame = null;
+    JFrame imageFrame = null, histFrame = null;
     int threshValue;
 
     public MainMenu() {
@@ -94,7 +87,7 @@ public class MainMenu extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
-    // Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -103,10 +96,12 @@ public class MainMenu extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         menuAbrirImg = new javax.swing.JMenuItem();
-        menuHist = new javax.swing.JMenu();
-        menuCreate = new javax.swing.JMenuItem();
         menuProc = new javax.swing.JMenu();
         menuFind = new javax.swing.JMenuItem();
+        btnLBPH = new javax.swing.JMenuItem();
+        btnCross = new javax.swing.JMenuItem();
+        btnHaralick = new javax.swing.JMenuItem();
+        btnTodos = new javax.swing.JMenuItem();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -129,20 +124,6 @@ public class MainMenu extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
-        menuHist.setText("Histogram");
-        menuHist.setActionCommand("Zoom");
-        menuHist.setEnabled(false);
-
-        menuCreate.setText("Create Histogram");
-        menuCreate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuCreateActionPerformed(evt);
-            }
-        });
-        menuHist.add(menuCreate);
-
-        jMenuBar1.add(menuHist);
-
         menuProc.setText("Processar");
         menuProc.setEnabled(false);
 
@@ -154,25 +135,41 @@ public class MainMenu extends javax.swing.JFrame {
         });
         menuProc.add(menuFind);
 
+        btnLBPH.setText("LBPH");
+        menuProc.add(btnLBPH);
+
+        btnCross.setText("Cross Correlation");
+        menuProc.add(btnCross);
+
+        btnHaralick.setText("Haralick");
+        menuProc.add(btnHaralick);
+
+        btnTodos.setText("Todos");
+        menuProc.add(btnTodos);
+
         jMenuBar1.add(menuProc);
 
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup().addGap(72, 72, 72).addComponent(lblGuide).addContainerGap(74,
-                        Short.MAX_VALUE)));
-        layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup().addGap(30, 30, 30).addComponent(lblGuide).addContainerGap(33,
-                        Short.MAX_VALUE)));
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(72, 72, 72)
+                .addComponent(lblGuide)
+                .addContainerGap(74, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addComponent(lblGuide)
+                .addContainerGap(33, Short.MAX_VALUE))
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void menuCreateActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuCreateActionPerformed
-        this.show_histogram();
-    }// GEN-LAST:event_menuCreateActionPerformed
 
     private void menuFindActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuFindActionPerformed
         // mainImage.test();
@@ -192,7 +189,7 @@ public class MainMenu extends javax.swing.JFrame {
             Imgproc.cvtColor(image, imageBW, Imgproc.COLOR_RGB2GRAY);
             imgw = imageBW.width();
             imgh = imageBW.height();
-            this.img = imageBW;
+            this.img = imageBW.clone();
             this.show_image();
         }
     }// GEN-LAST:event_jMenuItem3ActionPerformed
@@ -236,15 +233,17 @@ public class MainMenu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem btnCross;
+    private javax.swing.JMenuItem btnHaralick;
+    private javax.swing.JMenuItem btnLBPH;
+    private javax.swing.JMenuItem btnTodos;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JLabel lblGuide;
     private javax.swing.JMenuItem menuAbrirImg;
-    private javax.swing.JMenuItem menuCreate;
     private javax.swing.JMenuItem menuFind;
-    private javax.swing.JMenu menuHist;
     private javax.swing.JMenu menuProc;
     // End of variables declaration//GEN-END:variables
 
@@ -278,12 +277,10 @@ public class MainMenu extends javax.swing.JFrame {
         imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // shows main image frame
+        show_histogram();
         imageFrame.setVisible(true);
         imageFrame.setResizable(false);
-
-        // enables the option to show the image's histogram
-        menuHist.setEnabled(true);
-        lblGuide.setText("Abra o hisograma da imagem em Histogram > Draw Histogram");
+        lblGuide.setText("Selecione o processamento no menu Processar");
 
         // enables the option to process the image
         menuProc.setEnabled(true);
@@ -291,27 +288,23 @@ public class MainMenu extends javax.swing.JFrame {
     }
 
     public void show_histogram() {
-        // creates a frame for the histogram
-        JFrame histFrame = new JFrame("Histograma");
-        histogramImage = new HistogramImage(this.image);
-
-        // creates a panel for the histogram to be drawn on
-        JPanel histogram = new JPanel();
-        histogram.setLayout(new BoxLayout(histogram, BoxLayout.LINE_AXIS));
-        histogram.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        histogram.add(histogramImage);
-        Container hcontent = histFrame.getContentPane();
-
-        // creates the histogram chart and adds it to the panel
-        hcontent.add(histogramImage.createChart(this.image), BorderLayout.CENTER);
-
-        // sets the screen size
-        histFrame.setSize(1100, 900);
-
-        // opens the frame
-        histFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        // create main frame
+        histFrame = new JFrame("Histograma");
+        
+        //creates histogram
+        Histogram h = new Histogram(img);
+        Mat hist = h.createHistImage();
+        BufferedImage image = (BufferedImage) HighGui.toBufferedImage(hist);
+        
+        histFrame.setSize(image.getWidth() + 100, image.getHeight() + 100);
+        
+        JLabel histImage = new JLabel(new ImageIcon(image));
+        histFrame.getContentPane().add(histImage, BorderLayout.CENTER);
         histFrame.setVisible(true);
+        histFrame.setResizable(false);
+        
     }
+    
 
     public void show_threshold() { // https://docs.opencv.org/3.4/db/d8e/tutorial_threshold.html
         // creating the frame for threshold value selection
@@ -353,14 +346,14 @@ public class MainMenu extends javax.swing.JFrame {
                 threshValue = source.getValue();
                 sampleT = Threshold.threshold(sample, threshValue);
                 imgT = Threshold.threshold(img, threshValue);
-                image = (BufferedImage) HighGui.toBufferedImage(imgT);
+                image = (BufferedImage) HighGui.toBufferedImage(sampleT);
                 imgLabel.setIcon(new ImageIcon(image));
                 thresh.repaint();
             }
         });
 
         thresh.getContentPane().add(slider, BorderLayout.PAGE_START);
-        imgLabel = new JLabel(new ImageIcon(HighGui.toBufferedImage(img)));
+        imgLabel = new JLabel(new ImageIcon(sampleImage));
         thresh.getContentPane().add(imgLabel, BorderLayout.CENTER);
         thresh.getContentPane().add(btnConfirmar, BorderLayout.PAGE_END);
 

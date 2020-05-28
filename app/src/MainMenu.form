@@ -29,23 +29,6 @@
             </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="menuHist">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Histogram"/>
-            <Property name="actionCommand" type="java.lang.String" value="Zoom"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-          <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="menuCreate">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Create Histogram"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuCreateActionPerformed"/>
-              </Events>
-            </MenuItem>
-          </SubComponents>
-        </Menu>
         <Menu class="javax.swing.JMenu" name="menuProc">
           <Properties>
             <Property name="text" type="java.lang.String" value="Processar"/>
@@ -59,6 +42,26 @@
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuFindActionPerformed"/>
               </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="btnLBPH">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="LBPH"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="btnCross">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Cross Correlation"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="btnHaralick">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Haralick"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="btnTodos">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Todos"/>
+              </Properties>
             </MenuItem>
           </SubComponents>
         </Menu>

@@ -15,31 +15,17 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComponent;
 import object.Component;
-import object.HaralickFeatures;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.highgui.HighGui;
-import org.opencv.imgproc.Imgproc;
 import processing.CrossCorrelation;
 import processing.Labelling;
-import processing.Threshold;
 import utilities.DeepCopy;
 import utilities.Grayscale;
-import utilities.MatConversion;
 
 public class MainImage extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener {
     // sampleImage is the selected sample of the image
@@ -58,7 +44,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     // constructor for the canvas, adds the mouse listeners
     public MainImage(Mat img, MainMenu m) {
         mm = m;
-        this.img = img;
+        this.img = img.clone();
         this.image = (BufferedImage) HighGui.toBufferedImage(img);
 
         setDoubleBuffered(false);
@@ -93,8 +79,8 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     }
 
     void setSampleMat(Mat mat, Mat imgT) {
-        this.sampleMat = mat;
-        this.imgThresh = imgT;
+        this.sampleMat = mat.clone();
+        this.imgThresh = imgT.clone();
         BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(sampleMat);
         mm.drawSample(bteste);
         test();
@@ -144,39 +130,46 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
     // retirar depois PIROGA
     public void test() {
-        HaralickFeatures hf = new HaralickFeatures((BufferedImage)HighGui.toBufferedImage(sampleMat));
-
-        Mat teste = new Mat();
-        // teste = HoughCircle.circleTransform(sampleMat);
-        Mat element = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2 * 2 + 1, 2 * 2 + 1),
-                new org.opencv.core.Point(2, 2));
-        Mat label = new Mat();
-
-        int c = Imgproc.connectedComponents(imgThresh, label, 4, CvType.CV_16U);
-
-        List<Mat> listMatriz = new ArrayList<>();
-        ArrayList<Component> objetos = new ArrayList<>();
-        int labelValue;
-
-        for (int lbl = 1; lbl < c; lbl++) {
-            Mat mat = new Mat(label.height(), label.width(), CvType.CV_8UC1, new Scalar(0, 0, 0));
-            int size = 0;
-            for (int i = 0; i < label.height(); i++) {
-                for (int j = 0; j < label.width(); j++) {
-                    labelValue = (int) label.get(i, j)[0];
-                    if (labelValue == lbl) {
-                        size++;
-                        mat.put(i, j, 255);
-                    }
-                }
+        // Histogram hist = new Histogram(img);
+        // Mat img = hist.createHistImage();
+        // BufferedImage btestejrene = (BufferedImage) HighGui.toBufferedImage(img);
+        // mm.drawSample(btestejrene);
+        
+        List<Component> sampleLabels = Labelling.getLabels(sampleMat);
+        Component sampleObject = sampleLabels.get(0);
+        Mat og = Labelling.getImagesForLabel(sampleObject.getImage(), img);
+        sampleObject.setOriginal(og);
+        sampleObject.calculateFeatures();
+        List<Component> allObjects = Labelling.getLabels(imgThresh);
+        
+        for(int i = 0; i < allObjects.size(); i++){
+            Component c = allObjects.get(i);
+            System.out.println("Objeto " + i + ": ");
+            BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(c.getImage());
+            mm.drawSample(bteste);
+            og = Labelling.getImagesForLabel(c.getImage(), img);
+            c.setOriginal(og);
+            c.calculateFeatures();
+            c.compareFeatures(sampleObject);
+            boolean cc = CrossCorrelation.match(c, sampleObject);
+            if(cc) System.out.println("Cross correlation matches");
+            else System.out.println("Cross correlation doesn't match");
+            /*Mat cc = CrossCorrelation.match(sampleObject, c.getOriginal());
+            if(cc == null){
+                continue;
             }
-            if (size > 100) {
-                listMatriz.add(mat);
-                objetos.add(new Component(mat, size));
+            bteste = (BufferedImage) HighGui.toBufferedImage(cc);
+            mm.drawSample(bteste);*/
+            
+            System.out.print("\n");
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException ie) {
+
             }
         }
 
-        double radio;
+        /*double radio;
         Random rand = new Random();
         Mat draw = Mat.zeros(teste.size(), CvType.CV_8UC3);
         for (int i = 0; i < listMatriz.size(); i++) {
@@ -189,13 +182,12 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
                 objetos.get(i).setPerimeter(cont_perimeter);
                 objetos.get(i).calculateFeatures();
                 Mat xd = CrossCorrelation.match(objetos.get(i).getImage(), sampleMat);
-                if(xd == null){
+                if (xd == null) {
                     continue;
+                } else {
+                    
                 }
-                System.out.println("Circularity: " + objetos.get(i).getCircularity());
-                System.out.println("Area: " + objetos.get(i).getArea());
-                radio = Math.sqrt(objetos.get(i).getArea()/3.14);
-                System.out.println("Raio: " + radio);
+                radio = Math.sqrt(objetos.get(i).getArea() / 3.14);
                 Imgproc.drawContours(draw, contours, j,
                         new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), -1);
                 BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(xd);
@@ -206,7 +198,8 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
                 }
             }
-        }
+        }*/
+        // end
 
         // for(int i = 0; i < label.height(); i++){
         // for(int j = 0; j < label.width(); j++){

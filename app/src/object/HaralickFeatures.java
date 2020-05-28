@@ -1,10 +1,8 @@
 package object;
 
 import de.lmu.ifi.dbs.jfeaturelib.features.Haralick;
-import de.lmu.ifi.dbs.utilities.Arrays2;
 import ij.process.ColorProcessor;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 /**
  *
@@ -14,7 +12,7 @@ public class HaralickFeatures {
 
     private double energia;
     private double contraste;
-    private double correlacao; 
+    //private double correlacao; 
     private double variancia;
     private double entropia;
 
@@ -27,7 +25,7 @@ public class HaralickFeatures {
 
         this.energia = feats[0];
         this.contraste = feats[1];
-        this.correlacao = feats[2];
+        //this.correlacao = feats[2];
         this.variancia = feats[3];
         this.entropia = feats[8];
     }
@@ -39,9 +37,9 @@ public class HaralickFeatures {
     public double getContraste() {
         return contraste;
     }
-    public double getCorrelacao() {
+    /*public double getCorrelacao() {
         return correlacao;
-    }
+    }*/
     public double getVariancia() {
         return variancia;
     }
