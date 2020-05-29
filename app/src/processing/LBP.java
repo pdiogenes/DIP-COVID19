@@ -1,9 +1,15 @@
 package processing;
 
 import hist.Histogram;
+
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
+/**
+ *
+ * @author Pedro
+ */
 public class LBP {
 
     public static Mat calcLBP (Mat mat) {
@@ -34,5 +40,9 @@ public class LBP {
         
         Histogram hist = new Histogram(dstjrene);
         return hist.getHist();
+    }
+    
+    public static double compareLBP(Mat m1, Mat m2){
+        return Imgproc.compareHist(m1, m2, Imgproc.CV_COMP_CORREL);
     }
 }

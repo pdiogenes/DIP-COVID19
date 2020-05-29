@@ -7,6 +7,7 @@ import java.awt.image.ColorConvertOp;
  *
  * @author Pedro 
  * converts a regular buffered image into a grayscale one
+ * useless since opencv has a conversion method
  */
 public class Grayscale {
     public static BufferedImage getGray(BufferedImage image) {

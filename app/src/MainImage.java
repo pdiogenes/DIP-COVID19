@@ -1,4 +1,3 @@
-
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -15,29 +14,41 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 
 import javax.swing.JComponent;
-import object.Component;
+
 import org.opencv.core.Mat;
 import org.opencv.highgui.HighGui;
+
+import object.Component;
 import processing.CrossCorrelation;
+import processing.LBP;
 import processing.Labelling;
+import result.Result;
 import utilities.DeepCopy;
 import utilities.Grayscale;
 
+/**
+ *
+ * @author Pedro
+ */
 public class MainImage extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener {
     // sampleImage is the selected sample of the image
     private BufferedImage image, sampleImage;
     private Graphics2D g2;
     private String current_state;
+
     // shape to draw the selected area with
     private Shape shape = null;
     Point startDrag, endDrag;
     Point sampleP1 = new Point(), sampleP2 = new Point();
     final MainMenu mm;
     double zoomFactor = 1;
+    List<Component> sampleLabels = new ArrayList<Component>();
+    List<Component> allObjects = new ArrayList<Component>();
 
     private Mat sampleMat, img, imgThresh;
 
@@ -51,6 +62,14 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
+    }
+    
+    public String getState() {
+        return current_state;
+    }
+
+    public void setState(String current_state) {
+        this.current_state = current_state;
     }
 
     // paints the canvas whenever repaint() is called
@@ -81,9 +100,28 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     void setSampleMat(Mat mat, Mat imgT) {
         this.sampleMat = mat.clone();
         this.imgThresh = imgT.clone();
-        BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(sampleMat);
-        mm.drawSample(bteste);
-        test();
+        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(sampleMat);
+        mm.drawSample(s);
+        this.init();
+        
+        switch(this.current_state){
+            case "LBP":
+                this.lbp();
+                break;
+            case "Cross":
+                this.cross();
+                break;
+            case "Haralick":
+                this.haralick();
+                break;
+            case "Circ":
+                this.circ();
+                break;
+            case "Area":
+                this.area();
+                break;
+            default: break;
+        }
     }
 
     // opens the last saved image
@@ -128,103 +166,127 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         }
     }
 
-    // retirar depois PIROGA
-    public void test() {
-        // Histogram hist = new Histogram(img);
-        // Mat img = hist.createHistImage();
-        // BufferedImage btestejrene = (BufferedImage) HighGui.toBufferedImage(img);
-        // mm.drawSample(btestejrene);
+
+    public void lbp(){
+        List<Component> detectedObjects = new ArrayList<Component>();
         
-        List<Component> sampleLabels = Labelling.getLabels(sampleMat);
         Component sampleObject = sampleLabels.get(0);
-        Mat og = Labelling.getImagesForLabel(sampleObject.getImage(), img);
-        sampleObject.setOriginal(og);
-        sampleObject.calculateFeatures();
-        List<Component> allObjects = Labelling.getLabels(imgThresh);
+        Mat sampleLBPH = LBP.calcLBP(sampleObject.getOriginal());
         
         for(int i = 0; i < allObjects.size(); i++){
             Component c = allObjects.get(i);
-            System.out.println("Objeto " + i + ": ");
-            BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(c.getImage());
-            mm.drawSample(bteste);
-            og = Labelling.getImagesForLabel(c.getImage(), img);
-            c.setOriginal(og);
-            c.calculateFeatures();
-            c.compareFeatures(sampleObject);
-            boolean cc = CrossCorrelation.match(c, sampleObject);
-            if(cc) System.out.println("Cross correlation matches");
-            else System.out.println("Cross correlation doesn't match");
-            /*Mat cc = CrossCorrelation.match(sampleObject, c.getOriginal());
-            if(cc == null){
-                continue;
-            }
-            bteste = (BufferedImage) HighGui.toBufferedImage(cc);
-            mm.drawSample(bteste);*/
+            Mat objectLBPH = LBP.calcLBP(c.getOriginal());
+            double comparison = LBP.compareLBP(sampleLBPH, objectLBPH);
             
-            System.out.print("\n");
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException ie) {
-
+            if(comparison > 0.95){
+                detectedObjects.add(c);
             }
         }
 
-        /*double radio;
-        Random rand = new Random();
-        Mat draw = Mat.zeros(teste.size(), CvType.CV_8UC3);
-        for (int i = 0; i < listMatriz.size(); i++) {
-            ArrayList<MatOfPoint> contours = new ArrayList<>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(objetos.get(i).getImage(), contours, hierarchy, Imgproc.RETR_EXTERNAL,
-                    Imgproc.CHAIN_APPROX_SIMPLE);
-            for (int j = 0; j < contours.size(); j++) {
-                double cont_perimeter = Imgproc.arcLength(new MatOfPoint2f(contours.get(j).toArray()), true);
-                objetos.get(i).setPerimeter(cont_perimeter);
-                objetos.get(i).calculateFeatures();
-                Mat xd = CrossCorrelation.match(objetos.get(i).getImage(), sampleMat);
-                if (xd == null) {
-                    continue;
-                } else {
-                    
-                }
-                radio = Math.sqrt(objetos.get(i).getArea() / 3.14);
-                Imgproc.drawContours(draw, contours, j,
-                        new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), -1);
-                BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(xd);
-                mm.drawSample(bteste);
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException ie) {
+        Mat resultado = Result.resultado(detectedObjects, img);
+        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
+        mm.drawSample(s);
+        mm.changeButtonState(false);
+        mm.show_result(resultado, detectedObjects.size());
 
-                }
+    }
+    
+    public void cross(){
+        List<Component> detectedObjects = new ArrayList<Component>();
+        
+        Component sampleObject = sampleLabels.get(0);
+        for(int i = 0; i < allObjects.size(); i++){
+            Component c = allObjects.get(i);
+            
+            boolean comparison = CrossCorrelation.match(c, sampleObject);
+            if(comparison){
+                detectedObjects.add(c);
             }
-        }*/
-        // end
-
-        // for(int i = 0; i < label.height(); i++){
-        // for(int j = 0; j < label.width(); j++){
-        // System.out.print(label.get(i, j)[0] + " ");
-        // }
-        // System.out.print("\n");
-        // }
-
-        // System.out.println(c + " components");
-
-        // Mat seeMyLabels = new Mat();
-        // Core.normalize(label, seeMyLabels, 0, 255, Core.NORM_MINMAX, CvType.CV_8UC1);
-
-        /*
-         * for(int i = 0; i < listMatriz.size(); i++){ teste = listMatriz.get(i);
-         * BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
-         * mm.drawSample(bteste); }
-         */
-        // teste = Labelling.labelling(teste);
-        // teste = seeMyLabels;
-        // BufferedImage bteste = (BufferedImage) HighGui.toBufferedImage(teste);
-        // mm.drawSample(bteste);
-        // BufferedImage t = Threshold.threshold(sampleImage);
-        // mm.drawSample(t);
-
+        }
+        
+        Mat resultado = Result.resultado(detectedObjects, img);
+        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
+        mm.drawSample(s);
+        mm.changeButtonState(false);
+        mm.show_result(resultado, detectedObjects.size());
+    }
+    
+    public void haralick(){
+        List<Component> detectedObjects = new ArrayList<Component>();
+        
+        Component sampleObject = sampleLabels.get(0);
+        for(int i = 0; i < allObjects.size(); i++){
+            Component c = allObjects.get(i);
+            
+            if(c.compareFeatures(sampleObject)){
+                detectedObjects.add(c);
+            }
+            System.out.println("");
+        }
+        
+        detectedObjects.add(sampleObject);
+        
+        Mat resultado = Result.resultado(detectedObjects, img);
+        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
+        mm.drawSample(s);
+        mm.changeButtonState(false);
+        mm.show_result(resultado, detectedObjects.size());
+    }
+    
+    public void circ(){
+        List<Component> detectedObjects = new ArrayList<Component>();
+        
+        Component sampleObject = sampleLabels.get(0);
+        for(int i = 0; i < allObjects.size(); i++){
+            Component c = allObjects.get(i);
+            double diff = Math.abs(c.getCircularity() - sampleObject.getCircularity());
+            
+            if(diff < 1){
+                detectedObjects.add(c);
+            }
+        }
+        
+        Mat resultado = Result.resultado(detectedObjects, img);
+        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
+        mm.drawSample(s);
+        mm.changeButtonState(false);
+        mm.show_result(resultado, detectedObjects.size());
+    }
+    
+    public void area(){
+        List<Component> detectedObjects = new ArrayList<Component>();
+        
+        Component sampleObject = sampleLabels.get(0);
+        for(int i = 0; i < allObjects.size(); i++){
+            Component c = allObjects.get(i);
+            double diff = Math.abs(c.getArea() - sampleObject.getArea());
+            if(diff < 200){
+                detectedObjects.add(c);
+            }
+        }
+        
+        Mat resultado = Result.resultado(detectedObjects, img);
+        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
+        mm.drawSample(s);
+        mm.changeButtonState(false);
+        mm.show_result(resultado, detectedObjects.size());
+    }
+    
+    public void init() {
+        // gets labels for objects
+        sampleLabels = Labelling.getLabels(sampleMat);
+        allObjects = Labelling.getLabels(imgThresh);
+        
+        for(Component sample : sampleLabels){
+            sample.setOriginal(Labelling.getImagesForLabel(sample.getImage(), img));
+            sample.calculateFeatures();
+        }
+        
+        for(Component c : allObjects){
+            c.setOriginal(Labelling.getImagesForLabel(c.getImage(), img));
+            c.calculateFeatures();
+        }
+        
     }
 
     @Override
@@ -263,6 +325,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
                         sampleP2.y - sampleP1.y);
                 sampleImage = DeepCopy.copyImage(Grayscale.getGray(subImage));
                 mm.drawSample(sampleImage);
+                mm.changeButtonState(true);
                 startDrag = null;
                 endDrag = null;
                 repaint();

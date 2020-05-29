@@ -2,6 +2,7 @@ package object;
 
 import de.lmu.ifi.dbs.jfeaturelib.features.Haralick;
 import ij.process.ColorProcessor;
+
 import java.awt.image.BufferedImage;
 
 /**

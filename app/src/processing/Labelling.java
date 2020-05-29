@@ -2,7 +2,9 @@ package processing;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import object.Component;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -46,6 +48,8 @@ public class Labelling {
 
         return objetos;
     }
+    
+    
 
     public static Mat getImagesForLabel(Mat image, Mat original){
         int menorW = image.width(), menorH = image.height();

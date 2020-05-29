@@ -1,13 +1,13 @@
-
-import hist.Histogram;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -20,14 +20,17 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+
 import processing.Threshold;
 import utilities.Grayscale;
 import utilities.MatConversion;
+import hist.Histogram;
 
 /**
  *
@@ -97,11 +100,11 @@ public class MainMenu extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         menuAbrirImg = new javax.swing.JMenuItem();
         menuProc = new javax.swing.JMenu();
-        menuFind = new javax.swing.JMenuItem();
         btnLBPH = new javax.swing.JMenuItem();
         btnCross = new javax.swing.JMenuItem();
         btnHaralick = new javax.swing.JMenuItem();
-        btnTodos = new javax.swing.JMenuItem();
+        btnCircularidade = new javax.swing.JMenuItem();
+        btnArea = new javax.swing.JMenuItem();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -127,25 +130,45 @@ public class MainMenu extends javax.swing.JFrame {
         menuProc.setText("Processar");
         menuProc.setEnabled(false);
 
-        menuFind.setText("Achar Virus");
-        menuFind.addActionListener(new java.awt.event.ActionListener() {
+        btnLBPH.setText("LBPH");
+        btnLBPH.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuFindActionPerformed(evt);
+                btnLBPHActionPerformed(evt);
             }
         });
-        menuProc.add(menuFind);
-
-        btnLBPH.setText("LBPH");
         menuProc.add(btnLBPH);
 
         btnCross.setText("Cross Correlation");
+        btnCross.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCrossActionPerformed(evt);
+            }
+        });
         menuProc.add(btnCross);
 
         btnHaralick.setText("Haralick");
+        btnHaralick.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHaralickActionPerformed(evt);
+            }
+        });
         menuProc.add(btnHaralick);
 
-        btnTodos.setText("Todos");
-        menuProc.add(btnTodos);
+        btnCircularidade.setText("Forma - Circularidade");
+        btnCircularidade.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCircularidadeActionPerformed(evt);
+            }
+        });
+        menuProc.add(btnCircularidade);
+
+        btnArea.setText("Forma - Área");
+        btnArea.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAreaActionPerformed(evt);
+            }
+        });
+        menuProc.add(btnArea);
 
         jMenuBar1.add(menuProc);
 
@@ -171,6 +194,31 @@ public class MainMenu extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnHaralickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHaralickActionPerformed
+        this.show_threshold();
+        mainImage.setState("Haralick");
+    }//GEN-LAST:event_btnHaralickActionPerformed
+
+    private void btnCrossActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrossActionPerformed
+        this.show_threshold();
+        mainImage.setState("Cross");
+    }//GEN-LAST:event_btnCrossActionPerformed
+
+    private void btnLBPHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLBPHActionPerformed
+        this.show_threshold();
+        mainImage.setState("LBP");
+    }//GEN-LAST:event_btnLBPHActionPerformed
+
+    private void btnCircularidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCircularidadeActionPerformed
+        this.show_threshold();
+        mainImage.setState("Circ");
+    }//GEN-LAST:event_btnCircularidadeActionPerformed
+
+    private void btnAreaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAreaActionPerformed
+        this.show_threshold();
+        mainImage.setState("Area");
+    }//GEN-LAST:event_btnAreaActionPerformed
+
     private void menuFindActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuFindActionPerformed
         // mainImage.test();
         this.show_threshold();
@@ -189,6 +237,7 @@ public class MainMenu extends javax.swing.JFrame {
             Imgproc.cvtColor(image, imageBW, Imgproc.COLOR_RGB2GRAY);
             imgw = imageBW.width();
             imgh = imageBW.height();
+            Core.normalize(imageBW, imageBW, 0, 255, Core.NORM_MINMAX);
             this.img = imageBW.clone();
             this.show_image();
         }
@@ -233,20 +282,26 @@ public class MainMenu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem btnArea;
+    private javax.swing.JMenuItem btnCircularidade;
     private javax.swing.JMenuItem btnCross;
     private javax.swing.JMenuItem btnHaralick;
     private javax.swing.JMenuItem btnLBPH;
-    private javax.swing.JMenuItem btnTodos;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JLabel lblGuide;
     private javax.swing.JMenuItem menuAbrirImg;
-    private javax.swing.JMenuItem menuFind;
     private javax.swing.JMenu menuProc;
     // End of variables declaration//GEN-END:variables
 
+    public void changeButtonState(boolean enable){
+        if(enable){
+            menuProc.setEnabled(true);
+        } else menuProc.setEnabled(false);
+    }
+    
     public void show_image() {
         // checks if theres already one opened
         if (imageFrame != null) {
@@ -281,9 +336,6 @@ public class MainMenu extends javax.swing.JFrame {
         imageFrame.setVisible(true);
         imageFrame.setResizable(false);
         lblGuide.setText("Selecione o processamento no menu Processar");
-
-        // enables the option to process the image
-        menuProc.setEnabled(true);
 
     }
 
@@ -364,6 +416,10 @@ public class MainMenu extends javax.swing.JFrame {
         thresh.setSize(windowW, windowH);
         thresh.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         thresh.setVisible(true);
+    }
+    
+    public void show_result(Mat resultado, int numEncontrados){
+        JFrame resultFrame = new JFrame();
     }
 
     public void drawSample(BufferedImage area) {

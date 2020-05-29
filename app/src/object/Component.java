@@ -2,6 +2,7 @@ package object;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -54,13 +55,31 @@ public class Component {
         return this.original;
     }
 
-    public void compareFeatures(Component c) {
-        System.out.println("Energia: " + this.haralick.getEnergia() + " x " + c.haralick.getEnergia());
-        System.out.println("Contrasete: " + this.haralick.getContraste() + " x " + c.haralick.getContraste());
-        //System.out.println("Correlação: " + this.haralick.getCorrelacao() + " x " + c.haralick.getCorrelacao());
-        System.out.println("Variância: " + this.haralick.getVariancia() + " x " + c.haralick.getVariancia());
-        System.out.println("Entropia: " + this.haralick.getEntropia() + " x " + c.haralick.getEntropia());
-        System.out.println("Circularidade: " + this.getCircularity() + " x " + c.getCircularity());
+    public boolean compareFeatures(Component c) {
+        int matches = 0;
+        
+         System.out.println("Energia: " + this.haralick.getEnergia() + " x " + c.haralick.getEnergia());
+        if( Math.abs(this.haralick.getEnergia() - c.haralick.getEnergia()) < 1){
+            matches++;
+        }
+        
+         System.out.println("Contrasete: " + this.haralick.getContraste() + " x " + c.haralick.getContraste());
+        if( Math.abs(this.haralick.getContraste() - c.haralick.getContraste()) < 2){
+            matches++;
+        }
+        
+         System.out.println("Variância: " + this.haralick.getVariancia() + " x " + c.haralick.getVariancia());
+        if( Math.abs(this.haralick.getVariancia() - c.haralick.getVariancia()) < 1){
+            matches++;
+        }
+        
+         System.out.println("Entropia: " + this.haralick.getEntropia() + " x " + c.haralick.getEntropia());
+        if( Math.abs(this.haralick.getEntropia() - c.haralick.getEntropia()) < 1){
+            matches++;
+        }
+        
+        if (matches >= 3) return true;
+        else return false;
     }
 
     public void calculateFeatures(){
