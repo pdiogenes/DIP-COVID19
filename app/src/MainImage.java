@@ -59,9 +59,12 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         this.image = (BufferedImage) HighGui.toBufferedImage(img);
 
         setDoubleBuffered(false);
+        addMouseWheelListener(this);
+    }
+    
+    public void addListeners(){
         addMouseListener(this);
         addMouseMotionListener(this);
-        addMouseWheelListener(this);
     }
     
     public String getState() {
@@ -185,8 +188,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
         Mat resultado = Result.resultado(detectedObjects, img);
         BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
-        mm.drawSample(s);
-        mm.changeButtonState(false);
         mm.show_result(resultado, detectedObjects.size());
 
     }
@@ -206,8 +207,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         
         Mat resultado = Result.resultado(detectedObjects, img);
         BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
-        mm.drawSample(s);
-        mm.changeButtonState(false);
         mm.show_result(resultado, detectedObjects.size());
     }
     
@@ -228,8 +227,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         
         Mat resultado = Result.resultado(detectedObjects, img);
         BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
-        mm.drawSample(s);
-        mm.changeButtonState(false);
         mm.show_result(resultado, detectedObjects.size());
     }
     
@@ -248,8 +245,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         
         Mat resultado = Result.resultado(detectedObjects, img);
         BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
-        mm.drawSample(s);
-        mm.changeButtonState(false);
         mm.show_result(resultado, detectedObjects.size());
     }
     
@@ -267,8 +262,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         
         Mat resultado = Result.resultado(detectedObjects, img);
         BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
-        mm.drawSample(s);
-        mm.changeButtonState(false);
         mm.show_result(resultado, detectedObjects.size());
     }
     

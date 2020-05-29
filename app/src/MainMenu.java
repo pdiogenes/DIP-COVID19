@@ -39,13 +39,13 @@ import hist.Histogram;
 public class MainMenu extends javax.swing.JFrame {
 
     MainImage mainImage;
-    JPanel sampleArea;
-    JLabel imgLabel;
+    JPanel sampleArea, histogramArea;
+    JLabel imgLabel, sampleLabel;
     Mat sample, sampleT;
     BufferedImage image, sampleImage;
     Mat img, imgT;
     int imgw, imgh;
-    JFrame imageFrame = null, histFrame = null;
+    JFrame imageFrame = null, sampleFrame = null, resultFrame = null;
     int threshValue;
 
     public MainMenu() {
@@ -307,10 +307,74 @@ public class MainMenu extends javax.swing.JFrame {
         if (imageFrame != null) {
             imageFrame.dispose();
         }
+        
+        if(sampleFrame != null){
+            sampleFrame.dispose();
+        }
+        
+        if(resultFrame != null){
+            resultFrame.dispose();
+        }
+        
+        // creates histogram for image
+        Histogram h = new Histogram(img);
+        Mat hist = h.createHistImage();
+        BufferedImage imageHist = (BufferedImage) HighGui.toBufferedImage(hist);
+        JLabel histImage = new JLabel(new ImageIcon(imageHist));
+        
         // create main frame
         imageFrame = new JFrame("Imagem");
         imageFrame.getContentPane().setLayout(null);
-        imageFrame.setSize(imgw * 2 + 25, imgh + 80);
+        imageFrame.setSize(imgw + 100 + imageHist.getWidth(), imgh + 80);
+        
+        // adds the histogram image
+        histImage.setBounds(imgw + 25, 10, imageHist.getWidth(), imageHist.getHeight());
+        imageFrame.getContentPane().add(histImage);
+
+        // create class for main image
+        mainImage = new MainImage(this.img, this);
+        
+        // adds a button to open the image sample selection
+        JButton btnOpenSample = new JButton("Open sample selection");
+        btnOpenSample.setBounds(imgw + 25, imageHist.getHeight() + 10, imageHist.getWidth(), 30);
+        imageFrame.getContentPane().add(btnOpenSample);
+        
+        btnOpenSample.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                imageFrame.dispose();
+                show_sample();
+            }
+
+        });
+        
+        // adds instructions
+        JLabel instructions = new JLabel("Scroll to zoom");
+        instructions.setBounds(10, imgh + 25, imageFrame.getWidth(), 20);
+        imageFrame.getContentPane().add(instructions);
+        
+        // adds m ain image to container
+        mainImage.setBounds(10, 10, imgw, imgh);
+        imageFrame.getContentPane().add(mainImage);
+        imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // shows main image frame
+        imageFrame.setVisible(true);
+        imageFrame.setResizable(false);
+        lblGuide.setText("Selecione o processamento no menu Processar");
+
+    }
+    
+    public void show_sample() {
+        // checks if theres already one opened
+        if (sampleFrame != null) {
+            sampleFrame.dispose();
+        }
+        
+        // create main frame
+        sampleFrame = new JFrame("Imagem");
+        sampleFrame.getContentPane().setLayout(null);
+        sampleFrame.setSize(imgw * 2 + 25, imgh + 80);
 
         // create class for main image
         mainImage = new MainImage(this.img, this);
@@ -318,45 +382,28 @@ public class MainMenu extends javax.swing.JFrame {
         // adds instructions
         JLabel instructions = new JLabel("Scroll to zoom, click and drag on the image to select a sample");
         instructions.setBounds(10, imgh + 25, imageFrame.getWidth(), 20);
-        imageFrame.getContentPane().add(instructions);
+        sampleFrame.getContentPane().add(instructions);
 
         // creates a panel in which the sample image will be drawn
         sampleArea = new JPanel();
         sampleArea.setBounds(imgw + 50, 10, imgw, imgh);
-        imageFrame.getContentPane().add(sampleArea);
+        sampleFrame.getContentPane().add(sampleArea);
 
         // adds m ain image to container
 
         mainImage.setBounds(10, 10, imgw, imgh);
-        imageFrame.getContentPane().add(mainImage);
-        imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        sampleFrame.getContentPane().add(mainImage);
+        sampleFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // shows main image frame
-        show_histogram();
-        imageFrame.setVisible(true);
-        imageFrame.setResizable(false);
+        sampleFrame.setVisible(true);
+        sampleFrame.setResizable(false);
         lblGuide.setText("Selecione o processamento no menu Processar");
+        
+        mainImage.addListeners();
 
     }
 
-    public void show_histogram() {
-        // create main frame
-        histFrame = new JFrame("Histograma");
-        
-        //creates histogram
-        Histogram h = new Histogram(img);
-        Mat hist = h.createHistImage();
-        BufferedImage image = (BufferedImage) HighGui.toBufferedImage(hist);
-        
-        histFrame.setSize(image.getWidth() + 100, image.getHeight() + 100);
-        
-        JLabel histImage = new JLabel(new ImageIcon(image));
-        histFrame.getContentPane().add(histImage, BorderLayout.CENTER);
-        histFrame.setVisible(true);
-        histFrame.setResizable(false);
-        
-    }
-    
 
     public void show_threshold() { // https://docs.opencv.org/3.4/db/d8e/tutorial_threshold.html
         // creating the frame for threshold value selection
@@ -398,15 +445,19 @@ public class MainMenu extends javax.swing.JFrame {
                 threshValue = source.getValue();
                 sampleT = Threshold.threshold(sample, threshValue);
                 imgT = Threshold.threshold(img, threshValue);
-                image = (BufferedImage) HighGui.toBufferedImage(sampleT);
+                image = (BufferedImage) HighGui.toBufferedImage(imgT);
+                sampleImage = (BufferedImage) HighGui.toBufferedImage(sampleT);
                 imgLabel.setIcon(new ImageIcon(image));
+                sampleLabel.setIcon(new ImageIcon(sampleImage));
                 thresh.repaint();
             }
         });
 
         thresh.getContentPane().add(slider, BorderLayout.PAGE_START);
-        imgLabel = new JLabel(new ImageIcon(sampleImage));
+        imgLabel = new JLabel(new ImageIcon((BufferedImage) HighGui.toBufferedImage(img)));
+        sampleLabel = new JLabel(new ImageIcon(sampleImage));
         thresh.getContentPane().add(imgLabel, BorderLayout.CENTER);
+        thresh.getContentPane().add(sampleLabel, BorderLayout.AFTER_LINE_ENDS);
         thresh.getContentPane().add(btnConfirmar, BorderLayout.PAGE_END);
 
         // sets the window size
@@ -419,7 +470,34 @@ public class MainMenu extends javax.swing.JFrame {
     }
     
     public void show_result(Mat resultado, int numEncontrados){
-        JFrame resultFrame = new JFrame();
+        resultFrame = new JFrame();
+        
+        if(sampleFrame != null){
+            sampleFrame.dispose();
+        }
+        
+        //gets result image from Mat
+        BufferedImage resultImage = (BufferedImage) HighGui.toBufferedImage(resultado);
+        
+        // creates frame to show result
+        resultFrame.getContentPane().setLayout(null);
+        resultFrame.setSize(resultImage.getWidth() + 50, resultImage.getHeight() + 100);
+        
+        // adds result image into frame
+        JLabel resultLabelImg = new JLabel(new ImageIcon(resultImage));
+        resultLabelImg.setBounds(10, 10, resultImage.getWidth(), resultImage.getHeight());
+        resultFrame.getContentPane().add(resultLabelImg);
+        
+        // adds text informing how many occurances were detected
+        JLabel lblResultText = new JLabel("Found " + numEncontrados + " occurances of the selected pattern");
+        lblResultText.setBounds(10, resultImage.getHeight() + 10, resultImage.getWidth(), 20);
+        resultFrame.getContentPane().add(lblResultText);
+        
+        //shows the frame
+        resultFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        resultFrame.setVisible(true);
+        
+        
     }
 
     public void drawSample(BufferedImage area) {
