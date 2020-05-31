@@ -139,6 +139,7 @@ public class MainMenu extends javax.swing.JFrame {
         menuProc.add(btnLBPH);
 
         btnCross.setText("Cross Correlation");
+        btnCross.setToolTipText("");
         btnCross.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCrossActionPerformed(evt);

@@ -255,7 +255,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         for(int i = 0; i < allObjects.size(); i++){
             Component c = allObjects.get(i);
             double diff = Math.abs(c.getArea() - sampleObject.getArea());
-            if(diff < 200){
+            if(diff < 300){
                 detectedObjects.add(c);
             }
         }
@@ -265,10 +265,54 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         mm.show_result(resultado, detectedObjects.size());
     }
     
+    public void all(){
+        List<Component> detectedCross = new ArrayList<Component>();
+        List<Component> detectedCrossLbp = new ArrayList<Component>();
+        List<Component> detectedCrossLbpHaralick = new ArrayList<Component>();
+        
+        Component sampleObject = sampleLabels.get(0);
+        
+        for(int i = 0; i < allObjects.size(); i++){
+            Component c = allObjects.get(i);
+            
+            boolean comparison = CrossCorrelation.match(c, sampleObject);
+            if(comparison){
+                detectedCross.add(c);
+            }
+        }
+        
+        Mat sampleLBPH = LBP.calcLBP(sampleObject.getOriginal());
+        
+        for(int i = 0; i < detectedCross.size(); i++){
+            Component c = detectedCross.get(i);
+            Mat objectLBPH = LBP.calcLBP(c.getOriginal());
+            double comparison = LBP.compareLBP(sampleLBPH, objectLBPH);
+            
+            if(comparison > 0.95){
+                detectedCrossLbp.add(c);
+            }
+        }
+        
+        for(int i = 0; i < detectedCrossLbp.size(); i++){
+            Component c = detectedCrossLbp.get(i);
+            
+            if(c.compareFeatures(sampleObject)){
+                detectedCrossLbpHaralick.add(c);
+            }
+            System.out.println("");
+        }
+        
+        Mat resultado = Result.resultado(detectedCrossLbpHaralick, img);
+        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
+        mm.show_result(resultado, detectedCrossLbpHaralick.size());
+    }
+    
     public void init() {
         // gets labels for objects
         sampleLabels = Labelling.getLabels(sampleT);
-        allObjects = Labelling.getLabels(imgThresh);
+        Component sampleObject = sampleLabels.get(0);
+        int minArea = (int) (sampleObject.getArea()/2.5);
+        allObjects = Labelling.getLabels2(imgThresh, minArea);
         
         for(Component smpl : sampleLabels){
             smpl.setOriginal(Labelling.getImagesForLabel(smpl.getImage(), sampleMat));

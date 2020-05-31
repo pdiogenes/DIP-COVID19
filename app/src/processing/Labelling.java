@@ -49,6 +49,48 @@ public class Labelling {
         return objetos;
     }
     
+    public static List<Component> getLabels2(Mat image, int minArea) {
+        Mat label = new Mat();
+        List<Component> objetos = new ArrayList<>();
+        List<Mat> imagens = new ArrayList<>();
+        List<Integer> areas = new ArrayList<>();
+
+        // returns the labelled binary image and the number of elements
+        int c = Imgproc.connectedComponents(image, label, 8, CvType.CV_16U);
+        
+        for(int i = 0; i < c; i++){
+            Mat mat = new Mat(label.height(), label.width(), CvType.CV_8UC1, new Scalar(0, 0, 0));
+            imagens.add(mat);
+            areas.add(0);
+        }
+
+        int labelValue;
+        for (int i = 0; i < label.height(); i++) {
+            for (int j = 0; j < label.width(); j++) {
+                labelValue = (int) label.get(i, j)[0];
+                if (labelValue != 0) {
+                    areas.set(labelValue, areas.get(labelValue) + 1);
+                    imagens.get(labelValue).put(i, j, 255);
+                }
+            }
+        }
+        
+        for(int i = 0; i < c; i++){
+            if(areas.get(i) < minArea){
+                imagens.remove(i);
+                areas.remove(i);
+                i--; c--;
+            }
+        }
+        
+        for(int i = 0; i < c; i++){
+            objetos.add( new Component(imagens.get(i), areas.get(i)) );
+        }
+        
+        System.out.println("Finished");
+        return objetos;
+    }
+    
     public static Mat getImagesForLabel(Mat image, Mat original){
         int menorW = image.width(), menorH = image.height();
         int maiorW = 0, maiorH = 0;
