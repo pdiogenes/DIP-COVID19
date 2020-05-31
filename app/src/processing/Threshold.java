@@ -12,7 +12,7 @@ public class Threshold {
     // using opencv, with parameters
     public static Mat threshold(Mat mat, int t) {
         Mat dst = new Mat();
-        Imgproc.medianBlur(mat, dst, 5);
+        Imgproc.medianBlur(mat, dst, 3);
         Imgproc.threshold(dst, dst, t, 255, Imgproc.THRESH_BINARY_INV);
         return dst;
     }

@@ -13,6 +13,9 @@ import org.opencv.imgproc.Imgproc;
 public class LBP {
 
     public static Mat calcLBP (Mat mat) {
+        
+        // https://www.pyimagesearch.com/2015/12/07/local-binary-patterns-with-python-opencv/
+        // apenas a teoria..
 
         Mat matjrene = mat.clone();
         Mat dstjrene = new Mat(mat.height(), mat.width(), mat.type(), new Scalar(0, 0, 0));

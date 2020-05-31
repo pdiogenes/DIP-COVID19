@@ -302,7 +302,7 @@ public class MainMenu extends javax.swing.JFrame {
         } else menuProc.setEnabled(false);
     }
     
-    public void show_image() {
+    public void show_image() { // http://blog.sodhanalibrary.com/2015/04/select-rectangular-area-in-image-using.html
         // checks if theres already one opened
         if (imageFrame != null) {
             imageFrame.dispose();
@@ -500,7 +500,7 @@ public class MainMenu extends javax.swing.JFrame {
         
     }
 
-    public void drawSample(BufferedImage area) {
+    public void drawSample(BufferedImage area) { // http://blog.sodhanalibrary.com/2015/04/select-rectangular-area-in-image-using.html
         Graphics g = sampleArea.getGraphics();
         sampleImage = area;
         g.clearRect(0, 0, imgw, imgh);

@@ -20,11 +20,18 @@ public class Component {
     private boolean isSample = false;
     private HaralickFeatures haralick;
     private Mat image, original;
+    public int x, y;
 
     public Component(Mat image, double area) {
         this.image = image;
         this.area = area;
-
+    }
+    
+    public Component(Mat image, double area, int x, int y) {
+        this.image = image;
+        this.area = area;
+        this.x = x;
+        this.y = y;
     }
 
     public double getArea() {

@@ -34,9 +34,11 @@ public class Result {
             // paints the contours
             for (int j = 0; j < contours.size(); j++) {
                 Imgproc.drawContours(draw, contours, j,
-                        new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), -1);
+                        new Scalar(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), 2);
             }
         }
         return draw;
     }
+    
+    
 }

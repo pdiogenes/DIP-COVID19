@@ -28,15 +28,13 @@ import processing.CrossCorrelation;
 import processing.LBP;
 import processing.Labelling;
 import result.Result;
-import utilities.DeepCopy;
-import utilities.Grayscale;
 
 /**
  *
  * @author Pedro
  */
 public class MainImage extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener {
-    // sampleImage is the selected sample of the image
+    // sampleImage is the selected sampleMat of the image
     private BufferedImage image, sampleImage;
     private Graphics2D g2;
     private String current_state;
@@ -50,7 +48,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     List<Component> sampleLabels = new ArrayList<Component>();
     List<Component> allObjects = new ArrayList<Component>();
 
-    private Mat sampleMat, img, imgThresh;
+    private Mat sampleT, img, imgThresh, sampleMat;
 
     // constructor for the canvas, adds the mouse listeners
     public MainImage(Mat img, MainMenu m) {
@@ -77,6 +75,9 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
 
     // paints the canvas whenever repaint() is called
     protected void paintComponent(Graphics g) {
+        // for the zoom functionality
+        // https://stackoverflow.com/questions/33925884/zoom-in-and-out-of-jpanel
+        
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
@@ -101,9 +102,9 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     }
 
     void setSampleMat(Mat mat, Mat imgT) {
-        this.sampleMat = mat.clone();
+        this.sampleT = mat.clone();
         this.imgThresh = imgT.clone();
-        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(sampleMat);
+        BufferedImage s = (BufferedImage) HighGui.toBufferedImage(sampleT);
         mm.drawSample(s);
         this.init();
         
@@ -223,7 +224,6 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
             System.out.println("");
         }
         
-        detectedObjects.add(sampleObject);
         
         Mat resultado = Result.resultado(detectedObjects, img);
         BufferedImage s = (BufferedImage) HighGui.toBufferedImage(resultado);
@@ -267,12 +267,12 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     
     public void init() {
         // gets labels for objects
-        sampleLabels = Labelling.getLabels(sampleMat);
+        sampleLabels = Labelling.getLabels(sampleT);
         allObjects = Labelling.getLabels(imgThresh);
         
-        for(Component sample : sampleLabels){
-            sample.setOriginal(Labelling.getImagesForLabel(sample.getImage(), img));
-            sample.calculateFeatures();
+        for(Component smpl : sampleLabels){
+            smpl.setOriginal(Labelling.getImagesForLabel(smpl.getImage(), sampleMat));
+            smpl.calculateFeatures();
         }
         
         for(Component c : allObjects){
@@ -314,9 +314,8 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
             try {
                 shape = makeRectangle(startDrag.x, startDrag.y, newX, newY);
                 fixPoints(startDrag.x, startDrag.y, newX, newY);
-                BufferedImage subImage = image.getSubimage(sampleP1.x, sampleP1.y, sampleP2.x - sampleP1.x,
-                        sampleP2.y - sampleP1.y);
-                sampleImage = DeepCopy.copyImage(Grayscale.getGray(subImage));
+                sampleMat = img.submat(sampleP1.y, sampleP2.y, sampleP1.x, sampleP2.x);
+                sampleImage = (BufferedImage) HighGui.toBufferedImage(sampleMat);
                 mm.drawSample(sampleImage);
                 mm.changeButtonState(true);
                 startDrag = null;
