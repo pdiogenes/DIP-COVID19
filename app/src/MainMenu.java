@@ -349,10 +349,32 @@ public class MainMenu extends javax.swing.JFrame {
 
         });
         
-        // adds instructions
-        JLabel instructions = new JLabel("Scroll to zoom");
-        instructions.setBounds(10, imgh + 25, imageFrame.getWidth(), 20);
+        // adds instructions and zoom buttons
+        JButton zoomIn = new JButton(" + "), zoomOut = new JButton(" - ");
+        JLabel instructions = new JLabel("Click the buttons to zoom");
+        instructions.setBounds(220, imgh + 25, imageFrame.getWidth() - 220, 20);
+        zoomIn.setBounds(10, imgh + 25, 100, 20);
+        zoomOut.setBounds(110, imgh + 25, 100, 20);
+        imageFrame.getContentPane().add(zoomIn);
+        imageFrame.getContentPane().add(zoomOut);
         imageFrame.getContentPane().add(instructions);
+        
+        // zoom button listeners
+        zoomIn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainImage.setZoomFactor(1.1 * mainImage.getZoomFactor());
+                mainImage.repaint();
+            }
+        });
+        
+        zoomOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainImage.setZoomFactor(mainImage.getZoomFactor() / 1.1);
+                mainImage.repaint();
+            }
+        });
         
         // adds m ain image to container
         mainImage.setBounds(10, 10, imgw, imgh);
@@ -381,9 +403,34 @@ public class MainMenu extends javax.swing.JFrame {
         mainImage = new MainImage(this.img, this);
 
         // adds instructions
-        JLabel instructions = new JLabel("Scroll to zoom, click and drag on the image to select a sample");
-        instructions.setBounds(10, imgh + 25, imageFrame.getWidth(), 20);
+        // adds instructions and zoom buttons
+        JButton zoomIn = new JButton(" + "), zoomOut = new JButton(" - ");
+        JLabel instructions = new JLabel("Click the buttons to zoom  --  "
+                + "Click and Drag to select sample area -- "
+                + "After selecting select the processing method on mainMenu");
+        instructions.setBounds(220, imgh + 25, imageFrame.getWidth() - 220, 20);
+        zoomIn.setBounds(10, imgh + 25, 100, 20);
+        zoomOut.setBounds(110, imgh + 25, 100, 20);
+        sampleFrame.getContentPane().add(zoomIn);
+        sampleFrame.getContentPane().add(zoomOut);
         sampleFrame.getContentPane().add(instructions);
+        
+        // zoom button listeners
+        zoomIn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainImage.setZoomFactor(1.1 * mainImage.getZoomFactor());
+                mainImage.repaint();
+            }
+        });
+        
+        zoomOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainImage.setZoomFactor(mainImage.getZoomFactor() / 1.1);
+                mainImage.repaint();
+            }
+        });
 
         // creates a panel in which the sample image will be drawn
         sampleArea = new JPanel();

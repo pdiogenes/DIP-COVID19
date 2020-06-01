@@ -102,6 +102,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
     }
 
     void setSampleMat(Mat mat, Mat imgT) {
+        long start = System.currentTimeMillis();
         this.sampleT = mat.clone();
         this.imgThresh = imgT.clone();
         BufferedImage s = (BufferedImage) HighGui.toBufferedImage(sampleT);
@@ -126,6 +127,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
                 break;
             default: break;
         }
+        System.out.println((System.currentTimeMillis() - start)/1000.0 + " s");
     }
 
     // opens the last saved image
@@ -158,11 +160,11 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         }
     }
 
-    private double getZoomFactor() {
+    public double getZoomFactor() {
         return this.zoomFactor;
     }
 
-    private void setZoomFactor(double factor) {
+    public void setZoomFactor(double factor) {
         if (factor < this.zoomFactor) {
             this.zoomFactor = this.zoomFactor / 1.1;
         } else {
