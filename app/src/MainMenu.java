@@ -95,16 +95,13 @@ public class MainMenu extends javax.swing.JFrame {
 
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
-        lblGuide = new javax.swing.JLabel();
+        btnOpenImage = new javax.swing.JButton();
+        btnLBP = new javax.swing.JButton();
+        btnCCORR = new javax.swing.JButton();
+        btnHara = new javax.swing.JButton();
+        btnCir = new javax.swing.JButton();
+        btnAr = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        menuAbrirImg = new javax.swing.JMenuItem();
-        menuProc = new javax.swing.JMenu();
-        btnLBPH = new javax.swing.JMenuItem();
-        btnCross = new javax.swing.JMenuItem();
-        btnHaralick = new javax.swing.JMenuItem();
-        btnCircularidade = new javax.swing.JMenuItem();
-        btnArea = new javax.swing.JMenuItem();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -113,66 +110,53 @@ public class MainMenu extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("PID-Corona");
 
-        lblGuide.setText("Seleciona uma imagem em Arquivo > Abrir Imagem");
-
-        jMenu1.setText("Arquivo");
-
-        menuAbrirImg.setText("Abrir Imagem");
-        menuAbrirImg.addActionListener(new java.awt.event.ActionListener() {
+        btnOpenImage.setText("Abrir Imagem");
+        btnOpenImage.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuAbrirImgActionPerformed(evt);
+                btnOpenImageActionPerformed(evt);
             }
         });
-        jMenu1.add(menuAbrirImg);
 
-        jMenuBar1.add(jMenu1);
-
-        menuProc.setText("Processar");
-        menuProc.setEnabled(false);
-
-        btnLBPH.setText("LBPH");
-        btnLBPH.addActionListener(new java.awt.event.ActionListener() {
+        btnLBP.setText("LBPH");
+        btnLBP.setEnabled(false);
+        btnLBP.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLBPHActionPerformed(evt);
+                btnLBPActionPerformed(evt);
             }
         });
-        menuProc.add(btnLBPH);
 
-        btnCross.setText("Cross Correlation");
-        btnCross.setToolTipText("");
-        btnCross.addActionListener(new java.awt.event.ActionListener() {
+        btnCCORR.setText("Cross Correlation");
+        btnCCORR.setEnabled(false);
+        btnCCORR.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCrossActionPerformed(evt);
+                btnCCORRActionPerformed(evt);
             }
         });
-        menuProc.add(btnCross);
 
-        btnHaralick.setText("Haralick");
-        btnHaralick.addActionListener(new java.awt.event.ActionListener() {
+        btnHara.setText("Descitores de Haralick");
+        btnHara.setEnabled(false);
+        btnHara.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnHaralickActionPerformed(evt);
+                btnHaraActionPerformed(evt);
             }
         });
-        menuProc.add(btnHaralick);
 
-        btnCircularidade.setText("Forma - Circularidade");
-        btnCircularidade.addActionListener(new java.awt.event.ActionListener() {
+        btnCir.setText("Circularidade");
+        btnCir.setToolTipText("");
+        btnCir.setEnabled(false);
+        btnCir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCircularidadeActionPerformed(evt);
+                btnCirActionPerformed(evt);
             }
         });
-        menuProc.add(btnCircularidade);
 
-        btnArea.setText("Forma - Área");
-        btnArea.addActionListener(new java.awt.event.ActionListener() {
+        btnAr.setText("Area");
+        btnAr.setEnabled(false);
+        btnAr.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAreaActionPerformed(evt);
+                btnArActionPerformed(evt);
             }
         });
-        menuProc.add(btnArea);
-
-        jMenuBar1.add(menuProc);
-
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -180,52 +164,38 @@ public class MainMenu extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(72, 72, 72)
-                .addComponent(lblGuide)
-                .addContainerGap(74, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnOpenImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnLBP, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
+                    .addComponent(btnCCORR, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
+                    .addComponent(btnHara, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
+                    .addComponent(btnCir, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
+                    .addComponent(btnAr, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addComponent(lblGuide)
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(btnOpenImage)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnLBP)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCCORR)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnHara)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCir)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnAr)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnHaralickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHaralickActionPerformed
-        this.show_threshold();
-        mainImage.setState("Haralick");
-    }//GEN-LAST:event_btnHaralickActionPerformed
-
-    private void btnCrossActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrossActionPerformed
-        this.show_threshold();
-        mainImage.setState("Cross");
-    }//GEN-LAST:event_btnCrossActionPerformed
-
-    private void btnLBPHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLBPHActionPerformed
-        this.show_threshold();
-        mainImage.setState("LBP");
-    }//GEN-LAST:event_btnLBPHActionPerformed
-
-    private void btnCircularidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCircularidadeActionPerformed
-        this.show_threshold();
-        mainImage.setState("Circ");
-    }//GEN-LAST:event_btnCircularidadeActionPerformed
-
-    private void btnAreaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAreaActionPerformed
-        this.show_threshold();
-        mainImage.setState("Area");
-    }//GEN-LAST:event_btnAreaActionPerformed
-
-    private void menuFindActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuFindActionPerformed
-        // mainImage.test();
-        this.show_threshold();
-    }// GEN-LAST:event_menuFindActionPerformed
-
-    private void menuAbrirImgActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jMenuItem3ActionPerformed
+    private void btnOpenImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOpenImageActionPerformed
         JFileChooser fc = new JFileChooser();
         FileFilter filter = new FileNameExtensionFilter("Imagens Permitidas", "jpg", "png", "tiff");
         fc.setFileFilter(filter);
@@ -242,6 +212,40 @@ public class MainMenu extends javax.swing.JFrame {
             this.img = imageBW.clone();
             this.show_image();
         }
+    }//GEN-LAST:event_btnOpenImageActionPerformed
+
+    private void btnLBPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLBPActionPerformed
+        this.show_threshold();
+        mainImage.setState("LBP");
+    }//GEN-LAST:event_btnLBPActionPerformed
+
+    private void btnCCORRActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCCORRActionPerformed
+        this.show_threshold();
+        mainImage.setState("Cross");
+    }//GEN-LAST:event_btnCCORRActionPerformed
+
+    private void btnHaraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHaraActionPerformed
+        this.show_threshold();
+        mainImage.setState("Haralick");
+    }//GEN-LAST:event_btnHaraActionPerformed
+
+    private void btnCirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCirActionPerformed
+        this.show_threshold();
+        mainImage.setState("Circ");
+    }//GEN-LAST:event_btnCirActionPerformed
+
+    private void btnArActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArActionPerformed
+        this.show_threshold();
+        mainImage.setState("Area");
+    }//GEN-LAST:event_btnArActionPerformed
+
+    private void menuFindActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuFindActionPerformed
+        // mainImage.test();
+        this.show_threshold();
+    }// GEN-LAST:event_menuFindActionPerformed
+
+    private void menuAbrirImgActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jMenuItem3ActionPerformed
+        
     }// GEN-LAST:event_jMenuItem3ActionPerformed
 
     /**
@@ -283,24 +287,31 @@ public class MainMenu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem btnArea;
-    private javax.swing.JMenuItem btnCircularidade;
-    private javax.swing.JMenuItem btnCross;
-    private javax.swing.JMenuItem btnHaralick;
-    private javax.swing.JMenuItem btnLBPH;
-    private javax.swing.JMenu jMenu1;
+    private javax.swing.JButton btnAr;
+    private javax.swing.JButton btnCCORR;
+    private javax.swing.JButton btnCir;
+    private javax.swing.JButton btnHara;
+    private javax.swing.JButton btnLBP;
+    private javax.swing.JButton btnOpenImage;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JLabel lblGuide;
-    private javax.swing.JMenuItem menuAbrirImg;
-    private javax.swing.JMenu menuProc;
     // End of variables declaration//GEN-END:variables
 
     public void changeButtonState(boolean enable){
         if(enable){
-            menuProc.setEnabled(true);
-        } else menuProc.setEnabled(false);
+            this.btnAr.setEnabled(true);
+            this.btnCCORR.setEnabled(true);
+            this.btnCir.setEnabled(true);
+            this.btnHara.setEnabled(true);
+            this.btnLBP.setEnabled(true);
+        } else{
+            this.btnAr.setEnabled(false);
+            this.btnCCORR.setEnabled(false);
+            this.btnCir.setEnabled(false);
+            this.btnHara.setEnabled(false);
+            this.btnLBP.setEnabled(false);
+        }
     }
     
     public void show_image() { // http://blog.sodhanalibrary.com/2015/04/select-rectangular-area-in-image-using.html
@@ -384,7 +395,6 @@ public class MainMenu extends javax.swing.JFrame {
         // shows main image frame
         imageFrame.setVisible(true);
         imageFrame.setResizable(false);
-        lblGuide.setText("Selecione o processamento no menu Processar");
 
     }
     
@@ -446,7 +456,6 @@ public class MainMenu extends javax.swing.JFrame {
         // shows main image frame
         sampleFrame.setVisible(true);
         sampleFrame.setResizable(false);
-        lblGuide.setText("Selecione o processamento no menu Processar");
         
         mainImage.addListeners();
 
