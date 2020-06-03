@@ -313,7 +313,7 @@ public class MainImage extends JComponent implements MouseListener, MouseMotionL
         // gets labels for objects
         sampleLabels = Labelling.getLabels(sampleT);
         Component sampleObject = sampleLabels.get(0);
-        int minArea = (int) (sampleObject.getArea()/2.5);
+        int minArea = (int) (sampleObject.getArea()/2);
         allObjects = Labelling.getLabels2(imgThresh, minArea);
         
         for(Component smpl : sampleLabels){
